@@ -1,5 +1,5 @@
 import { RouteRecordRaw } from "vue-router";
-import { constantRoutes, adminDynamicRoutes, reviewerDynamicRoutes } from "@/router";
+import { constantRoutes, adminDynamicRoutes } from "@/router";
 import { store } from "@/store";
 import { listRoutes } from "@/api/menu";
 
@@ -98,9 +98,7 @@ export const usePermissionStore = defineStore("permission", () => {
    */
   async function generateRoutes(roles: string[]) {
     let dynamicRoutes = reactive([]) as RouteRecordRaw[];
-    if (roles.includes('paperReviewer')) {
-      Object.assign(dynamicRoutes, reviewerDynamicRoutes);
-    } else if (roles.includes('ROOT')) {
+    if (roles.includes('ROOT')) {
       //超级管理员,擁有所有權限,直接使用後臺接口獲取的動態路由
       Object.assign(dynamicRoutes, adminDynamicRoutes);
     }
