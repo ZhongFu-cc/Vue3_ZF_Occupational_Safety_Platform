@@ -2,456 +2,217 @@
 <template>
   <div class="content">
 
-    <BasicComponent title="會員管理" :totalCount="memberRes.total + '人'">
-      <template v-slot:search-box>
-        <div class="search-box">
-          <el-input v-model="fetchConditions.input" placeholder="輸入內容,Enter查詢"
-            @input="fetchMemberListWithPaginationAndStatus" />
-
-          <el-select v-model="fetchConditions.filterStatus" class="filter-status" placeholder="請選擇">
-            <el-option v-for="status in statusList" :label="status.label" :value="status.value" />
-          </el-select>
-        </div>
+    <BasicComponent title="成員管理" :totalCount="totalCount + ' 人'">
+      <template #search-box>
+        <el-input v-model="queryText" placeholder="搜尋用戶"
+          @input="findChildUserByQueryTextAndPagination(currentPage, pageSize, queryText)"></el-input>
       </template>
 
-      <template v-slot:option-box>
-        <div class="btn-box">
-          <el-button class="btn-insert" type="primary" @click="insertMemberDialogState.openDialog">
-            新增<el-icon>
-              <Plus />
-            </el-icon>
-          </el-button>
-
-          <el-button type="danger" @click="batchDeleteMember" :disabled="deleteButtonIsDisabled">
-            刪除<el-icon class="el-icon--right">
-              <Delete />
-            </el-icon>
-          </el-button>
-
-          <el-button type="success" @click="downloadExcel">下載Excel</el-button>
-        </div>
+      <template #option-box>
+        <el-button type="primary" @click="createDialogState.open">新增用戶</el-button>
       </template>
 
-      <template v-slot:data-table>
-        <MemberTable :member-data="memberRes.records" view-page="index" @open-tag-dialog="tagDialogState.openDialog"
-          @open-edit-dialog="updateMemberDrawerState.openDrawer" @delete-member="deleteMember"
-          @mutli-delete-members="handleSelectionChange" />
+      <template #data-table>
+        <el-table :data="userList">
+          <el-table-column v-if="role === 'admin'" prop="companyName" label="公司名稱" width="200"></el-table-column>
+          <el-table-column prop="realName" label="用戶名" width="180" />
+          <el-table-column prop="email" label="信箱" :show-overflow-tooltip="true" />
+          <el-table-column prop="phone" label="電話號碼" width="160" />
+          <el-table-column label="是否啟用" width="120">
+            <template #default="{ row }">
+              <el-switch v-model="row.isActive" :active-value="1" :inactive-value="0"
+                @change="handleChangeUserStatus(row.sysUserId, row.isActive)" />
+            </template>
+          </el-table-column>
+          <el-table-column label="操作">
+            <template #default="{ row }">
+              <el-button link type="success" @click="detailDrawerState.open(row.sysUserId)">查看詳情</el-button>
+              <el-button link type="primary" @click="updateDialogState.open(row.sysUserId)">更新</el-button>
+              <el-button link type="danger" @click="handleDeleteUser(row.sysUserId)">刪除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
       </template>
 
-      <template v-slot:pagination-box>
-        <el-pagination layout="prev, pager, next" @current-change="handlePageChange"
-          :page-count="Number(memberRes.pages)" :default-page-size="Number(memberRes.size)"
-          :hide-on-single-page="false" />
-      </template>
     </BasicComponent>
 
-    <el-dialog v-model="tagDialogState.isOpen" title="編輯標籤" :width="tagDialogState.width"
-      :before-close="tagDialogState.closeDialog">
-      <h1>{{ assignMember.name }}</h1>
-      <div class="transfer-box">
-        <el-transfer ref="transferPanelRef" v-model="assignMember.tagList" :data="transferDataList"
-          :titles="['未擁有', '已擁有']">
-          <template #default="{ option }">
-            <el-popover v-if="option.isOverParentElementWidth" class="box-item" placement="top" :width="option.width">
-              <template #reference>
-                <el-tag :color="option.color" size="large" round>{{ option.label }}</el-tag>
-              </template>
-              <template #default>
-                <el-tag :color="option.color" size="large" round>{{ option.label }}</el-tag>
-              </template>
-            </el-popover>
-            <el-tag v-else :color="option.color" size="large" round>{{ option.label }}</el-tag>
-          </template>
-          <template #left-empty>
-            <el-empty :image-size="60" description="No data" />
-          </template>
-          <template #right-empty>
-            <el-empty :image-size="60" description="No data" />
-          </template>
-        </el-transfer>
-      </div>
-      <template #footer>
-        <el-button @click="tagDialogState.closeDialog">取消</el-button>
-        <el-button type="primary" @click="submitTagsList">保存</el-button>
+    <el-drawer v-model="detailDrawerState.isOpen" title="用戶詳情" :size="device === 'mobile' ? '90%' : '40%'">
+      <template #default>
+        <Detail :sysUser="sysUser" />
       </template>
-    </el-dialog>
-
-
-
-    <!-- 修改時的Drawer -->
-    <el-drawer v-model="updateMemberDrawerState.isOpen" title="更改資料" :size="updateMemberDrawerState.width"
-      :before-close="updateMemberDrawerState.closeDrawer">
-      <UpdateMemberForm :member-data="updateMemberForm" @update-member="handleUpdateSubmit" />
     </el-drawer>
 
-
-    <el-dialog v-model="insertMemberDialogState.isOpen" title="新增會員" :width="insertMemberDialogState.width">
-      <InsertMemberForm @close="insertMemberDialogState.closeDialog" />
+    <el-dialog v-model="updateDialogState.isOpen" title="更新用戶資訊">
+      <Update :sysUser="sysUser" :role="role" @submit="updateDialogState.close" @cancel="updateDialogState.close" />
     </el-dialog>
+
+    <el-dialog v-model="createDialogState.isOpen" title="新增用戶">
+      <Create :role="role" @submit="createDialogState.close" @cancel="createDialogState.close" />
+    </el-dialog>
+
   </div>
 </template>
 
 <script setup lang='ts'>
 import BasicComponent from '@/layout/components/Basic/index.vue'
+import Detail from './components/Detail.vue';
+import Update from './components/Update.vue';
+import Create from './components/Create.vue';
+import type { SysUser, UpdateUserStatus } from '@/api/system/type';
+import { useUserService } from '@/service/UserService';
+import { useAppStore, useUserStore } from '@/store';
+import { tryCatch } from '@/utils/tryCatch';
+import { ElNotification } from 'element-plus';
 
-import { ref, reactive } from 'vue'
-import { Delete, Plus } from '@element-plus/icons-vue'
-import { fetchMembersWithPaginationAndStatusApi, updateMemberApi, deleteMemberApi, batchDeleteMemberApi, downloadMemberExcelApi, assignTagsToMember } from '@/api/member'
-import { getAllTagsApi } from '@/api/tag'
+const userStore = useUserStore();
+const device = useAppStore().device;
 
-
-import { Member, PutMemberForAdminInterface } from '@/api/member/type'
-import { tryCatch } from '@/utils/tryCatch'
-import InsertMemberForm from './components/InsertMemberForm.vue'
-import UpdateMemberForm from './components/UpdateMemberForm.vue'
-import MemberTable from './components/MemberTable.vue'
-import { useAppStore } from '@/store'
-
-
-
-
-const downloadExcel = async () => {
-  let res = await downloadMemberExcelApi()
-  const url = window.URL.createObjectURL(new Blob([res.data]));
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', '會員列表.xlsx');
-  document.body.appendChild(link);
-  link.click();
-}
-
-
-/**---------------------------
- * @description 管理獲取資料 
- *
- * @returns fetchConditions, memberRes, fetchMemberListWithPaginationAndStatus, handlePageChange
- * 
-*/
-const useFetchDataManagement = () => {
-
-  // 會員列表返回的數據結構
-  interface MemberResInterface {
-    current: number;
-    pages: number;
-    records: Array<Member>;
-    size: number;
-    total: number;
-  }
-
-  // 分頁及篩選條件
-  const fetchConditions = ref({
-    currentPage: 1,
-    input: '',
-    filterStatus: ''
-  })
-
-  // 會員列表數據
-  const memberRes = ref<MemberResInterface>({
-    current: 1,
-    pages: 1,
-    records: [],
-    size: 10,
-    total: 0
-  })
-
-  // 根據分頁及篩選條件獲取會員列表
-  const fetchMemberListWithPaginationAndStatus = async () => {
-    const { res, error }: any = await tryCatch(fetchMembersWithPaginationAndStatusApi(fetchConditions.value.currentPage, 10, fetchConditions.value.filterStatus, fetchConditions.value.input));
-    if (error || res.code !== 200) {
-      ElMessage.error(error || res.msg || '獲取會員列表失敗');
-    }
-    memberRes.value = res.data;
-  }
-
-  // 頁碼改變時的處理函數
-  const handlePageChange = (page: number) => {
-    fetchConditions.value.currentPage = page;
-    fetchMemberListWithPaginationAndStatus();
-  }
-
-  // 監聽輸入框變化，重置頁碼並重新獲取會員列表
-  watch(() => fetchConditions.value.filterStatus, (newVal, oldVal) => {
-    fetchConditions.value.currentPage = 1;
-    fetchMemberListWithPaginationAndStatus();
-  })
-
-  return {
-    fetchConditions,
-    memberRes,
-    fetchMemberListWithPaginationAndStatus,
-    handlePageChange
-  }
-}
-
-const { fetchConditions, memberRes, fetchMemberListWithPaginationAndStatus, handlePageChange } = useFetchDataManagement();
-
-
-
-/** --------- 刪除相關variable及function -------------- */
-const useDeleteMemberManagement = () => {
-
-  const selectedDeleteMemberList = ref<Member[]>([])
-
-  const deleteMember = async (memberId: string) => {
-    ElMessageBox.confirm(`確定要刪除此資料嗎？`, '確認刪除', {
-      confirmButtonText: '確定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    }).then(async () => {
-      // 用户選擇確認，繼續操作
-      console.log('Deleting member with ID:', memberId);
-      const { res, error }: any = await tryCatch(deleteMemberApi(memberId));
-      if (error || res.code !== 200) {
-        ElMessage.error(error || res.msg || '刪除會員失敗');
-        return;
-      }
-      fetchMemberListWithPaginationAndStatus();
-      ElMessage.success('刪除成功');
-    }).catch((err) => {
+const role = computed(() => {
+  if (userStore.user.roleList.includes('super-admin')) {
+    return 'admin';
+  } else if (userStore.user.roleList.includes('company_manager')) {
+    return 'company';
+  } else {
+    ElNotification({
+      title: '權限錯誤',
+      message: '您沒有訪問成員管理頁面的權限',
+      type: 'error',
     });
+    throw new Error('Unauthorized access to member management page');
+  }
+})
+
+const currentPage = ref<number>(1);
+const pageSize = ref<number>(10);
+const queryText = ref<string>('');
+
+const totalCount = ref<number>(0);
+const userService = useUserService(role.value);
+const userList = ref<SysUser[]>([]);
+
+const findChildUserByQueryTextAndPagination = async (page: number, size: number, queryText: string) => {
+  const { res, error }: any = await tryCatch(userService.fetchChildUsers(page, size, queryText));
+  console.log(res, error)
+  if (error || res.code !== 200) {
+    ElNotification({
+      title: '錯誤',
+      message: '無法獲取用戶列表',
+      type: 'error',
+    });
+    return;
   }
 
-  const handleSelectionChange = (val: Member[]) => {
-    selectedDeleteMemberList.value = val;
+  userList.value = res.data.records;
+  totalCount.value = res.data.total;
+}
+
+const sysUser = ref<SysUser>({} as SysUser);
+const findUserById = async (sysUserId: string) => {
+  const { res, error }: any = await tryCatch(userService.fetchUserById(sysUserId));
+  if (error || res.code !== 200) {
+    ElNotification({
+      title: '錯誤',
+      message: '無法獲取用戶信息',
+      type: 'error',
+    });
+    return;
   }
 
-  const batchDeleteMember = async () => {
-    if (selectedDeleteMemberList.value.length < 1) {
-      ElMessage.error("請至少勾選一筆資料進行刪除");
+  sysUser.value = res.data;
+}
+
+const handleChangeUserStatus = async (sysUserId: string, isActive: number) => {
+  const payload: UpdateUserStatus = {
+    sysUserId: sysUserId,
+    status: isActive,
+  }
+  const { res, error }: any = await tryCatch(userService.updateUserStatus(payload));
+  if (error || res.code !== 200) {
+    ElNotification({
+      title: '錯誤',
+      message: '無法更新用戶狀態',
+      type: 'error',
+    });
+    findChildUserByQueryTextAndPagination(currentPage.value, pageSize.value, queryText.value);
+    return;
+  }
+
+  ElNotification({
+    title: '成功',
+    message: '用戶狀態已更新',
+    type: 'success',
+  });
+
+  // 刷新用戶列表
+  findChildUserByQueryTextAndPagination(currentPage.value, pageSize.value, queryText.value);
+}
+
+const detailDrawerState = reactive({
+  isOpen: false,
+  open: (id: string) => {
+    detailDrawerState.isOpen = true;
+    findUserById(id);
+  },
+  close: () => {
+    detailDrawerState.isOpen = false;
+  }
+})
+
+const updateDialogState = reactive({
+  isOpen: false,
+  open: (id: string) => {
+    updateDialogState.isOpen = true;
+    findUserById(id);
+  },
+  close: () => {
+    updateDialogState.isOpen = false;
+    findChildUserByQueryTextAndPagination(currentPage.value, pageSize.value, queryText.value);
+  }
+})
+
+const createDialogState = reactive({
+  isOpen: false,
+  open: () => {
+    createDialogState.isOpen = true;
+  },
+  close: () => {
+    createDialogState.isOpen = false;
+    findChildUserByQueryTextAndPagination(currentPage.value, pageSize.value, queryText.value);
+  }
+})
+
+const handleDeleteUser = async (sysUserId: string) => {
+  ElMessageBox.confirm('確定要刪除該用戶嗎？', '警告', {
+    confirmButtonText: '確定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  }).then(async () => {
+    const { res, error }: any = await tryCatch(userService.deleteUser(sysUserId));
+    if (error || res.code !== 200) {
+      ElNotification({
+        title: '錯誤',
+        message: '無法刪除用戶',
+        type: 'error',
+      });
       return;
     }
-    ElMessageBox.confirm(`確定要刪除這${selectedDeleteMemberList.value.length}個會員資料嗎？`, '確認刪除', {
-      confirmButtonText: '確定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    }).then(async () => {
-      //確定刪除後使用父組件傳來的function
-      //提取idList
-      let deleteIdList = selectedDeleteMemberList.value.map(item => item.memberId);
-      const { res, error }: any = await tryCatch(batchDeleteMemberApi(deleteIdList));
-      if (error || res.code !== 200) {
-        ElMessage.error(error || res.msg || '批量刪除會員失敗');
-        return;
-      }
-      fetchMemberListWithPaginationAndStatus();
-      ElMessage.success('刪除成功');
-    }).catch((err) => {
+
+    ElNotification({
+      title: '成功',
+      message: '用戶已刪除',
+      type: 'success',
     });
-  }
 
-  return {
-    selectedDeleteMemberList,
-    deleteMember,
-    handleSelectionChange,
-    batchDeleteMember
-  }
+    // 刷新用戶列表
+    findChildUserByQueryTextAndPagination(currentPage.value, pageSize.value, queryText.value);
+  }).catch(() => {
+    // 用戶取消刪除操作
+  });
 }
-
-const { selectedDeleteMemberList, deleteMember, handleSelectionChange, batchDeleteMember } = useDeleteMemberManagement();
-
-
-
-/**-------------表單相關variable及function------------------------- */
-
-const insertMemberDialogState = ref<DialogState>({
-  isOpen: false,
-  width: computed(() => (useAppStore().device === 'mobile') ? '90%' : '45%'),
-  openDialog: () => {
-    insertMemberDialogState.value.isOpen = true
-  },
-  closeDialog: () => {
-    insertMemberDialogState.value.isOpen = false
-    fetchMemberListWithPaginationAndStatus()
-  }
-})
-
-
-
-
-/**------------編輯內容相關操作---------------------- */
-const updateMemberDrawerState = ref<DrawerState>({
-  isOpen: false,
-  width: computed(() => (useAppStore().device === 'mobile') ? '90%' : '45%'),
-  openDrawer: (member: Member) => {
-    updateMemberDrawerState.value.isOpen = true
-    Object.assign(updateMemberForm, member)
-  },
-  closeDrawer: () => {
-    updateMemberDrawerState.value.isOpen = false
-  }
-})
-
-//編輯的表單元素本身
-
-let updateMemberForm = reactive<Member>({
-  memberId: "",
-  email: "",
-  chineseName: "",
-  firstName: "",
-  lastName: "",
-  country: "",
-  remitAccountLast5: "",
-  affiliation: "",
-  jobTitle: "",
-  phone: "",
-  status: 0,
-  food: "",
-  foodTaboo: "",
-  receipt: "",
-  idCard: "",
-  category: 1,
-  amount: 0,
-  title: "",
-  tagList: [],
-  countryCode: "",
-})
-
-
-// 更新資料
-const handleUpdateSubmit = async (updateData: PutMemberForAdminInterface) => {
-  const { res, error }: any = await tryCatch(updateMemberApi(updateData));
-
-  if (error || res.code !== 200) {
-    ElMessage.error(error || res.msg || "修改會員資料失敗");
-    return;
-  }
-  ElMessage.success("修改完成");
-  fetchMemberListWithPaginationAndStatus();
-  updateMemberDrawerState.value.closeDrawer();
-}
-
-
-
-
-
-/**-------------------標籤-------------------- */
-// let tagsDialogIsOpen = ref(false);
-let assignMember = reactive<any>({});
-
-let tagsList = reactive<any>([]);
-
-let transferDataList = reactive<any>([]);
-
-
-
-const getTagsList = async () => {
-  let res = await getAllTagsApi()
-  Object.assign(tagsList, res.data);
-  res.data.forEach((item: any) => {
-    transferDataList.push({
-      label: item.name,
-      key: item.tagId,
-      disabled: item.status === 1,
-      color: item.color,
-      isOverParentElementWidth: false,
-      width: 0
-    })
-  })
-}
-
-const findFirstVaildTag = (tagList: any) => {
-  for (let i = 0; i < tagList.length; i++) {
-    if (tagList[i].status === 0) {
-      return tagList[i];
-    }
-  }
-  return '';
-}
-
-const tagDialogState = ref<DialogState>({
-  isOpen: false,
-  width: computed(() => (useAppStore().device === 'mobile') ? '90%' : '70%'),
-  openDialog: (member: Member) => {
-    tagDialogState.value.isOpen = true;
-    Object.assign(assignMember, member);
-    if (member.tagList) {
-      assignMember.tagList = Array.from(member.tagList).map((item: any) => item.tagId);
-    }
-  },
-  closeDialog: () => {
-    fetchMemberListWithPaginationAndStatus()
-    tagDialogState.value.isOpen = false;
-  }
-});
-
-
-const submitTagsList = async () => {
-  let data = {
-    memberId: assignMember.memberId,
-    targetTagIdList: assignMember.tagList
-  }
-
-  const { res, error }: any = await tryCatch(assignTagsToMember(data));
-  if (error || res.code !== 200) {
-    ElMessage.error(error || res.msg || '分配標籤失敗');
-    return;
-  }
-  tagDialogState.value.closeDialog();
-
-}
-
-/**====================處理新增與修改RWD================== */
-
-const transferPanelRef = ref();
-watch(() => transferPanelRef.value, (newVal) => {
-  if (newVal) {
-    // 獲取所有的 transfer body 元素
-    const transferPanelBodyList = transferPanelRef.value.$el.querySelectorAll('.el-transfer-panel__body');
-    // 遍歷 body 元素
-    transferPanelBodyList.forEach((transferPanelBody: any) => {
-      // 獲取 body 寬度
-      const transferPanelBodyWidth: number = Number(getComputedStyle(transferPanelBody).width.split('px')[0]);
-      //獲取裡面所有的 tag label
-      const transferPanelBodyItemTagContent = transferPanelBody.querySelectorAll('.el-tag__content');
-      // 遍歷所有的 tag 元素找出寬度超過父元素的
-      transferPanelBodyItemTagContent.forEach((item: any, index: number) => {
-        const width = Number(getComputedStyle(item).width.split('px')[0]);
-        if (width > transferPanelBodyWidth) {
-          let foundTag = transferDataList.find((tag: any) => tag.label === item.textContent);
-          foundTag.isOverParentElementWidth = true;
-          foundTag.width = width + 40;
-        }
-      });
-
-    });
-  }
-});
-
-/**-------------------掛載頁面時執行-------------------- */
 
 onMounted(() => {
-  fetchMemberListWithPaginationAndStatus()
-  getTagsList()
+  findChildUserByQueryTextAndPagination(currentPage.value, pageSize.value, queryText.value);
 })
-
-
-// 狀態選擇
-const statusList = ref<{ label: string, value: string }[]>([
-  {
-    label: '全選',
-    value: ''
-  }, {
-    label: '未繳費',
-    value: '0'
-  }, {
-    label: '待審核',
-    value: '1'
-  }, {
-    label: '繳費成功',
-    value: '2'
-  }, {
-    label: '繳費失敗',
-    value: '3'
-  }
-])
-
-const deleteButtonIsDisabled = computed(() => {
-  return selectedDeleteMemberList.value.length > 0 ? false : true;
-});
-
-const isDevice = computed(() => useAppStore().device === 'mobile' ? true : false);
-
-
 
 
 </script>

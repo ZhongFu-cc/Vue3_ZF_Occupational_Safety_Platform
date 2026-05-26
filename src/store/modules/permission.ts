@@ -98,7 +98,7 @@ export const usePermissionStore = defineStore("permission", () => {
    */
   async function generateRoutes(roles: string[]) {
     let dynamicRoutes = reactive([]) as RouteRecordRaw[];
-    if (roles.includes('ROOT')) {
+    if (roles.includes('super-admin') || roles.includes('company_manager')) {
       //超级管理员,擁有所有權限,直接使用後臺接口獲取的動態路由
       Object.assign(dynamicRoutes, adminDynamicRoutes);
     }

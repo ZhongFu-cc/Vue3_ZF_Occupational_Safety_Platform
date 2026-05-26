@@ -52,8 +52,8 @@ export const useUserStore = defineStore("user", () => {
     return new Promise((resolve, reject) => {
       getUserInfoApi()
         .then((res) => {
+          console.log(res.data)
           Object.assign(user, res.data);
-          user.roleList = ["ROOT"];
           resolve(res);
         })
         .catch((error) => {

@@ -17,7 +17,7 @@
         <el-form-item prop="email">
           <div class="flex-y-center w-full">
             <svg-icon icon-class="user" class="mx-2" />
-            <el-input ref="email" v-model="loginData.email" :placeholder="$t('login.username')" name="email"
+            <el-input ref="email" v-model="loginData.account" :placeholder="$t('login.username')" name="email"
               size="large" class="h-[48px]" />
           </div>
         </el-form-item>
@@ -81,13 +81,13 @@ const loginFormRef = ref(ElForm); // 登录表单ref
 const { height } = useWindowSize();
 
 let loginData = reactive({
-  email: "",
+  account: "",
   password: "",
 });
 
 const loginRules = computed(() => {
   return {
-    email: [
+    account: [
       {
         required: true,
         trigger: "blur",
