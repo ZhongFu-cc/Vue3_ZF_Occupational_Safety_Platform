@@ -6,7 +6,7 @@ export default {
   },
   // 登录页面国际化
   login: {
-    username: "用户名",
+    username: "帳號",
     password: "密碼",
     login: "登 錄",
     captchaCode: "驗證碼",

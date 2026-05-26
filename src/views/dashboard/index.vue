@@ -169,9 +169,8 @@ defineOptions({
 
 import { useUserStore } from "@/store/modules/user";
 import { useTransition, TransitionPresets } from "@vueuse/core";
-import { getOrganDonationConsentCountApi, getOrganDonationConsentCountByStatusApi } from "@/api/organDonationConsent";
 
-import { getArticleViewsCountApi, getArticleCountByGroupApi, getArticleViewsCountByGroupApi } from "@/api/article"
+
 
 
 
@@ -197,17 +196,17 @@ let socialWorkColumnCount = ref(0)
 
 
 //獲取總會員人數 及 已審核、未審核人數
-const getOrganDonationConsentCount = async () => {
-  let res = await getOrganDonationConsentCountApi()
-  organDonationConsentCount.value = res.data
+// const getOrganDonationConsentCount = async () => {
+//   let res = await getOrganDonationConsentCountApi()
+//   organDonationConsentCount.value = res.data
 
-  let approvedRes = await getOrganDonationConsentCountByStatusApi("1")
-  organDonationConsentApprovedCount.value = approvedRes.data
+//   let approvedRes = await getOrganDonationConsentCountByStatusApi("1")
+//   organDonationConsentApprovedCount.value = approvedRes.data
 
-  let pendingRes = await getOrganDonationConsentCountByStatusApi("0")
-  organDonationConsentPendingCount.value = pendingRes.data
+//   let pendingRes = await getOrganDonationConsentCountByStatusApi("0")
+//   organDonationConsentPendingCount.value = pendingRes.data
 
-}
+// }
 
 //獲取總文章瀏覽量總數 以及 各類別文章數量
 // const getCounteData = async () => {
