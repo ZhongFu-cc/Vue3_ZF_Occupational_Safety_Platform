@@ -5,10 +5,11 @@
     <BasicComponent title="成員管理" :totalCount="totalCount + ' 人'">
       <template #search-box>
         <el-input v-model="queryText" placeholder="搜尋用戶"
-          @input="findChildUserByQueryTextAndPagination(currentPage, pageSize, queryText)"></el-input>
+          @keyup.enter="findChildUserByQueryTextAndPagination(currentPage, pageSize, queryText)"></el-input>
       </template>
 
       <template #option-box>
+        <el-button v-if="role === 'company'">匯入</el-button>
         <el-button type="primary" @click="createDialogState.open">新增用戶</el-button>
       </template>
 
@@ -32,6 +33,11 @@
             </template>
           </el-table-column>
         </el-table>
+      </template>
+
+      <template #pagination-box>
+        <el-pagination layout="prev, pager, next" :current-page="currentPage" :total="Number(totalCount)"
+          @current-change="handlePageChange" />
       </template>
 
     </BasicComponent>
@@ -209,6 +215,17 @@ const handleDeleteUser = async (sysUserId: string) => {
     // 用戶取消刪除操作
   });
 }
+
+const handlePageChange = (page: number) => {
+  currentPage.value = page;
+  findChildUserByQueryTextAndPagination(currentPage.value, pageSize.value, queryText.value);
+};
+
+const handleSizeChange = (size: number) => {
+  pageSize.value = size;
+  currentPage.value = 1;
+  findChildUserByQueryTextAndPagination(currentPage.value, pageSize.value, queryText.value);
+};
 
 onMounted(() => {
   findChildUserByQueryTextAndPagination(currentPage.value, pageSize.value, queryText.value);

@@ -77,7 +77,7 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
     name: "member",
 
     meta: {
-      title: "會員管理",
+      title: "成員管理",
       icon: "el-icon-Avatar",
       keepAlive: true,
       alwaysShow: false,
@@ -88,7 +88,33 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/member/index.vue"),
         name: "memberPage",
         meta: {
-          title: "會員列表",
+          title: "成員列表",
+          icon: "el-icon-Avatar",
+          hidden: false,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+    ]
+  },
+  {
+    path: "/course",
+    component: Layout,
+    name: "course",
+
+    meta: {
+      title: "課程管理",
+      icon: "el-icon-Avatar",
+      keepAlive: true,
+      alwaysShow: false,
+    },
+    children: [
+      {
+        path: "/course-page",
+        component: () => import("@/views/course/index.vue"),
+        name: "coursePage",
+        meta: {
+          title: "課程列表",
           icon: "el-icon-Avatar",
           hidden: false,
           roles: ["ADMIN"],
