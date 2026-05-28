@@ -14,3 +14,12 @@ export interface UpdateCourseCategory {
   minRequiredMinutes: string;
   isActive: number;
 }
+
+export interface CourseCategory {
+  courseCategoryId: string;
+  name: string;
+  code: string;
+  description: string;
+  minRequiredMinutes: string;
+  isActive: number;
+}
