@@ -9,7 +9,7 @@ export function findCourseCategoryByIdApi(id: string) {
   })
 }
 
-export function findCourseListByQueryTextAndPaginationApi(page: number, size: number, queryText: string): Promise<any> {
+export function findCourseCategoryListByQueryTextAndPaginationApi(page: number, size: number, queryText: string): Promise<any> {
   return request({
     url: `${BASE_URL}/pagination`,
     method: 'get',
@@ -29,9 +29,9 @@ export function createCourseCategoryApi(data: AddCourseCategory) {
   })
 }
 
-export function updateCourseCategoryApi(id: string, data: UpdateCourseCategory) {
+export function updateCourseCategoryApi(data: UpdateCourseCategory) {
   return request({
-    url: `${BASE_URL}/${id}`,
+    url: `${BASE_URL}`,
     method: 'put',
     data
   })

@@ -27,9 +27,9 @@ export function createCourseChapterApi(data: AddCourseChapter) {
   })
 }
 
-export function updateCourseChapterApi(id: string, data: UpdateCourseChapter) {
+export function updateCourseChapterApi(data: UpdateCourseChapter) {
   return request({
-    url: `${BASE_URL}/${id}`,
+    url: `${BASE_URL}`,
     method: 'put',
     data
   })

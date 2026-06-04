@@ -1,17 +1,17 @@
 export interface AddCourseCategory {
   name: string;
-  code: string;
+  code?: string;
   description: string;
-  minRequiredMinutes: string;
+  minRequiredMinutes: number;
   isActive: number;
 }
 
 export interface UpdateCourseCategory {
   courseCategoryId: string;
   name: string;
-  code: string;
+  code?: string;
   description: string;
-  minRequiredMinutes: string;
+  minRequiredMinutes: number;
   isActive: number;
 }
 
@@ -20,6 +20,6 @@ export interface CourseCategory {
   name: string;
   code: string;
   description: string;
-  minRequiredMinutes: string;
+  minRequiredMinutes: number;
   isActive: number;
 }

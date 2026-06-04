@@ -1,9 +1,9 @@
 <template>
   <div class="content">
-    <BasicComponent title="課程管理" :totalCount="`${totalCount} 筆`">
+    <BasicComponent title="課程分類" :totalCount="`${totalCount} 筆`">
       <template #search-box>
         <div class="search-box">
-          <el-input v-model="courseCategoryId" placeholder="請輸入課程分類 ID（可留空）" clearable @keyup.enter="handleSearch" />
+          <el-input v-model="queryText" placeholder="請輸入課程分類名稱（可留空）" clearable @keyup.enter="handleSearch" />
           <el-button type="primary" :loading="loading" @click="handleSearch">查詢</el-button>
           <el-button @click="handleReset">重置</el-button>
         </div>
@@ -14,12 +14,12 @@
       </template>
 
       <template #data-table>
-        <el-table v-loading="loading" :data="courseList" empty-text="暫無課程資料">
-          <el-table-column prop="title" label="課程名稱" min-width="180" :show-overflow-tooltip="true" />
-          <el-table-column prop="description" label="課程描述" min-width="220" :show-overflow-tooltip="true" />
-          <el-table-column label="課程時長(分鐘)" width="130" align="center">
+        <el-table v-loading="loading" :data="courseCategoryList" empty-text="暫無課程資料">
+          <el-table-column prop="name" label="課程分類名稱" min-width="180" :show-overflow-tooltip="true" />
+          <el-table-column prop="description" label="課程分類描述" min-width="220" :show-overflow-tooltip="true" />
+          <el-table-column label="課程分類時長(分鐘)" width="150" align="center">
             <template #default="{ row }">
-              {{ displayTotalMinute(row.totalMinutes) }}
+              {{ displayTotalMinute(row.minRequiredMinutes) }}
             </template>
           </el-table-column>
           <el-table-column label="狀態" width="120" align="center">
@@ -27,11 +27,10 @@
               <el-switch v-model="row.isActive" :active-value="1" :inactive-value="0"></el-switch>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="180" align="center">
+          <el-table-column>
             <template #default="{ row }">
-              <el-button type="primary" link @click="() => updateDialogState.open(row)">編輯</el-button>
-              <el-button type="warning" link @click="() => toChapter(row.courseId)">章節</el-button>
-              <el-button type="danger" link @click="() => deleteCourse(row.courseId)">刪除</el-button>
+              <el-button type="primary" link @click="updateDialogState.open(row)">編輯</el-button>
+              <el-button type="danger" link @click="deleteCategory(row.courseCategoryId)">刪除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -43,36 +42,37 @@
       </template>
     </BasicComponent>
 
-    <el-dialog v-model="createDialogState.isOpen" title="新增課程" :width="device === 'mobile' ? '90%' : '40%'"
+    <el-dialog v-model="createDialogState.isOpen" title="新增課程分類" :width="device === 'mobile' ? '90%' : '40%'"
       @close="handleReset" :show-close="false" destroy-on-close>
-      <CreateCourseForm @submit="fetchCourseList" @cancel="createDialogState.close" />
+      <CreateCourseCategoryForm @submit="fetchCourseCategoryList" @cancel="createDialogState.close" />
     </el-dialog>
-    <el-dialog v-model="updateDialogState.isOpen" title="更新課程" :width="device === 'mobile' ? '90%' : '40%'"
+
+    <el-dialog v-model="updateDialogState.isOpen" title="編輯課程分類" :width="device === 'mobile' ? '90%' : '40%'"
       @close="handleReset" :show-close="false" destroy-on-close>
-      <UpdateCourseForm :course="updateCourseData" @submit="fetchCourseList" @cancel="updateDialogState.close" />
+      <UpdateCourseCategoryForm :courseCategory="updateCategory" @submit="fetchCourseCategoryList"
+        @cancel="updateDialogState.close" />
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import BasicComponent from '@/layout/components/Basic/index.vue';
-import { deleteCourseApi, findCourseListByCateforyIdAndPaginationApi } from '@/api/course/course';
 import { tryCatch } from '@/utils/tryCatch';
 import { ElNotification } from 'element-plus';
-import { Course } from '@/api/course/course/type';
-import CreateCourseForm from './components/Create.vue';
-import UpdateCourseForm from './components/Update.vue';
 import { useAppStore } from '@/store';
+import { deleteCourseCategoryApi, findCourseCategoryListByQueryTextAndPaginationApi } from '@/api/course/category';
+import { CourseCategory } from '@/api/course/category/type';
+import CreateCourseCategoryForm from './components/Create.vue';
+import UpdateCourseCategoryForm from './components/Update.vue';
 
 
-const router = useRouter();
+
 const currentPage = ref(1);
 const pageSize = ref(10);
 const totalCount = ref(0);
 const loading = ref(false);
-const courseCategoryId = ref('');
 const queryText = ref('');
-const courseList = ref<Course[]>([]);
+const courseCategoryList = ref<CourseCategory[]>([]);
 const device = useAppStore().device;
 
 const displayTotalMinute = (value?: number) => {
@@ -82,11 +82,11 @@ const displayTotalMinute = (value?: number) => {
   return value;
 };
 
-const fetchCourseList = async () => {
+const fetchCourseCategoryList = async () => {
   loading.value = true;
 
   const { res, error }: any = await tryCatch(
-    findCourseListByCateforyIdAndPaginationApi(currentPage.value, pageSize.value, courseCategoryId.value.trim(), queryText.value.trim())
+    findCourseCategoryListByQueryTextAndPaginationApi(currentPage.value, pageSize.value, queryText.value.trim())
   );
 
   console.log('API Response:', res);
@@ -96,31 +96,32 @@ const fetchCourseList = async () => {
   if (error || res?.code !== 200) {
     ElNotification({
       title: '錯誤',
-      message: '無法取得課程列表',
+      message: '無法取得課程分類列表',
       type: 'error',
     });
     return;
   }
 
-  console.log('課程列表資料:', res?.data);
-  courseList.value = Array.isArray(res?.data?.records) ? res.data.records : [];
+  console.log('課程分類資料:', res?.data);
+  courseCategoryList.value = Array.isArray(res?.data?.records) ? res.data.records : [];
   totalCount.value = Number(res?.data?.total ?? 0);
+  createDialogState.close();
+  updateDialogState.close();
 };
 
 const handleSearch = () => {
   currentPage.value = 1;
-  fetchCourseList();
+  fetchCourseCategoryList();
 };
 
 const handleReset = () => {
-  courseCategoryId.value = '';
   currentPage.value = 1;
-  fetchCourseList();
+  fetchCourseCategoryList();
 };
 
 const handlePageChange = (page: number) => {
   currentPage.value = page;
-  fetchCourseList();
+  fetchCourseCategoryList();
 };
 
 const createDialogState = reactive({
@@ -129,29 +130,28 @@ const createDialogState = reactive({
   close: () => createDialogState.isOpen = false,
 })
 
-const updateCourseData = reactive({} as Course);
+const updateCategory = reactive({} as CourseCategory);
 const updateDialogState = reactive({
   isOpen: false,
-  open: (row: Course) => {
+  open: (row: CourseCategory) => {
     updateDialogState.isOpen = true;
-    Object.assign(updateCourseData, row);
+    Object.assign(updateCategory, row);
   },
   close: () => updateDialogState.isOpen = false,
 })
 
-const deleteCourse = async (courseId: string) => {
-  console.log('刪除課程', courseId);
-  ElMessageBox.confirm('確定要刪除這門課程嗎？', '警告', {
+const deleteCategory = (categoryId: string) => {
+  ElMessageBox.confirm('確定要刪除這個課程分類嗎？', '警告', {
     confirmButtonText: '確定',
     cancelButtonText: '取消',
     type: 'warning',
   }).then(async () => {
-    const { res, error }: any = await tryCatch(deleteCourseApi(courseId));
-
+    // 在這裡呼叫刪除 API
+    const { res, error }: any = await tryCatch(deleteCourseCategoryApi(categoryId));
     if (error || res?.code !== 200) {
       ElNotification({
         title: '錯誤',
-        message: '無法刪除課程',
+        message: '無法刪除課程分類',
         type: 'error',
       });
       return;
@@ -159,21 +159,19 @@ const deleteCourse = async (courseId: string) => {
 
     ElNotification({
       title: '成功',
-      message: '課程已刪除',
+      message: '課程分類已刪除',
       type: 'success',
     });
-    fetchCourseList();
+
+    // 刪除後重新載入列表
+    fetchCourseCategoryList();
   }).catch(() => {
     // 使用者取消刪除
   });
 }
 
-const toChapter = (courseId: string) => {
-  router.push(`/course-chapter-page/${courseId}`);
-}
-
 onMounted(() => {
-  fetchCourseList();
+  fetchCourseCategoryList();
 });
 </script>
 

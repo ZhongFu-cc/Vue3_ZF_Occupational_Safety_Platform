@@ -110,6 +110,18 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
     },
     children: [
       {
+        path: "/course-category-page",
+        component: () => import("@/views/course-category/index.vue"),
+        name: "courseCategoryPage",
+        meta: {
+          title: "課程分類",
+          icon: "el-icon-Avatar",
+          hidden: false,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+      {
         path: "/course-page",
         component: () => import("@/views/course/index.vue"),
         name: "coursePage",
@@ -117,6 +129,18 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
           title: "課程列表",
           icon: "el-icon-Avatar",
           hidden: false,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+      {
+        path: "/course-chapter-page/:courseId",
+        component: () => import("@/views/course-chapter/index.vue"),
+        name: "courseChapterPage",
+        meta: {
+          title: "課程章節",
+          icon: "el-icon-Avatar",
+          hidden: true,
           roles: ["ADMIN"],
           keepAlive: true,
         },

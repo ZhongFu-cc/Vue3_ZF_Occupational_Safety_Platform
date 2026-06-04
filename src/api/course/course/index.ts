@@ -29,9 +29,9 @@ export function createCourseApi(data: FormData) {
   })
 }
 
-export function updateCourseApi(id: string, data: FormData) {
+export function updateCourseApi(data: FormData) {
   return request({
-    url: `${BASE_URL}/${id}`,
+    url: `${BASE_URL}`,
     method: 'put',
     data
   })

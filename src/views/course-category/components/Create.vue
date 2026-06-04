@@ -2,35 +2,18 @@
   <div class="create-panel">
     <el-form ref="createFormRef" :model="formData" :rules="rules" class="create-form" label-position="top"
       @submit.prevent status-icon>
-      <el-form-item class="upload-box">
-        <el-upload class="thumbnail-uploader" :action="envAPI + '/upload/img'" :show-file-list="false"
-          :on-success="handleImageUpload">
-          <img v-if="imageUrl" :src="imageUrl" class="avatar" />
-          <el-icon v-else class="avatar-uploader-icon">
-            <Plus />
-          </el-icon>
-        </el-upload>
+
+      <el-form-item label="課程分類名稱" prop="name">
+        <el-input v-model="formData.name" placeholder="請輸入課程分類名稱" clearable maxlength="100" show-word-limit />
       </el-form-item>
 
-      <el-form-item label="課程分類 ID" prop="courseCategoryId">
-        <el-select v-model="formData.courseCategoryId" placeholder="請選擇課程分類" clearable
-          @end-reached="fetchCourseCategoryList()">
-          <el-option v-for="item in courseCategoryList" :key="item.courseCategoryId" :label="item.name"
-            :value="item.courseCategoryId"></el-option>
-        </el-select>
-      </el-form-item>
-
-      <el-form-item label="課程名稱" prop="title">
-        <el-input v-model="formData.title" placeholder="請輸入課程名稱" clearable maxlength="100" show-word-limit />
-      </el-form-item>
-
-      <el-form-item label="課程描述" prop="description">
-        <el-input v-model="formData.description" type="textarea" :rows="4" placeholder="請輸入課程描述" maxlength="500"
+      <el-form-item label="課程分類描述" prop="description">
+        <el-input v-model="formData.description" type="textarea" :rows="4" placeholder="請輸入課程分類描述" maxlength="500"
           show-word-limit />
       </el-form-item>
 
-      <el-form-item label="課程時長(分鐘)" prop="totalMinute">
-        <el-input-number v-model="formData.totalMinutes" :min="1" :step="10" controls-position="right" />
+      <el-form-item label="課程分類時長(分鐘)" prop="minRequiredMinutes">
+        <el-input-number v-model="formData.minRequiredMinutes" :min="1" :step="10" controls-position="right" />
       </el-form-item>
 
       <el-form-item label="狀態" prop="isActive">
@@ -42,7 +25,7 @@
 
       <div class="action-row">
         <el-button @click="handleCancel">取消</el-button>
-        <el-button type="primary" :loading="props.submitting" @click="handleSubmit">建立課程</el-button>
+        <el-button type="primary" :loading="props.submitting" @click="handleSubmit">建立課程分類</el-button>
       </div>
     </el-form>
   </div>
@@ -51,13 +34,11 @@
 <script setup lang="ts">
 import { ElNotification, type FormInstance, type FormRules, type UploadProps, type UploadRawFile, type UploadUserFile } from 'element-plus';
 import { reactive, ref } from 'vue';
-import type { AddCourse } from '@/api/course/course/type';
-import type { CourseCategory } from '@/api/course/category/type';
-import { createCourseApi } from '@/api/course/course';
+import type { AddCourseCategory, CourseCategory } from '@/api/course/category/type';
+import { createCourseCategoryApi } from '@/api/course/category';
 import { tryCatch } from '@/utils/tryCatch';
 import { findCourseCategoryListByQueryTextAndPaginationApi } from '@/api/course/category';
 
-import InfiniteScrollSelect from '@/components/InfiniteScrollingSelect/index.vue';
 
 const props = defineProps<{
   submitting?: boolean;
@@ -65,26 +46,22 @@ const props = defineProps<{
 
 const emit = defineEmits(['submit', 'cancel']);
 
-const INITIAL_FORM: AddCourse = {
-  courseCategoryId: '',
-  title: '',
+const INITIAL_FORM: AddCourseCategory = {
+  name: '',
+  code: '',
   description: '',
-  totalMinutes: 60,
+  minRequiredMinutes: 60,
   isActive: 1,
 };
 
 const createFormRef = ref<FormInstance>();
-const formData = reactive<AddCourse>({ ...INITIAL_FORM });
+const formData = reactive<AddCourseCategory>({ ...INITIAL_FORM });
 
-watch(() => formData.courseCategoryId, (newVal) => {
-  console.log('選擇的課程分類 ID:', newVal);
-});
 
-const rules = reactive<FormRules<AddCourse>>({
-  courseCategoryId: [{ required: true, message: '請輸入課程分類 ID', trigger: 'blur' }],
-  title: [{ required: true, message: '請輸入課程名稱', trigger: 'blur' }],
+const rules = reactive<FormRules<AddCourseCategory>>({
+  name: [{ required: true, message: '請輸入課程名稱', trigger: 'blur' }],
   description: [{ required: true, message: '請輸入課程描述', trigger: 'blur' }],
-  totalMinutes: [
+  minRequiredMinutes: [
     { required: true, message: '請輸入課程時長', trigger: 'change' },
     {
       validator: (_, value, callback) => {
@@ -129,17 +106,13 @@ const handleSubmit = async () => {
   if (!valid) {
     return;
   }
-  const payload = new FormData();
-  payload.append('data', JSON.stringify(formData));
-  if (imgFile) {
-    payload.append('imgFile', imgFile);
-  }
 
-  const { res, error }: any = await tryCatch(createCourseApi(payload));
+
+  const { res, error }: any = await tryCatch(createCourseCategoryApi(formData));
   if (error || res?.code !== 200) {
     ElNotification({
       title: '錯誤',
-      message: '無法建立課程',
+      message: '無法建立課程分類',
       type: 'error',
     });
     return;
@@ -147,7 +120,7 @@ const handleSubmit = async () => {
 
   ElNotification({
     title: '成功',
-    message: '課程已建立',
+    message: '課程分類已建立',
     type: 'success',
   });
 
