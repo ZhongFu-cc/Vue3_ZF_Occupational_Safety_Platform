@@ -62,8 +62,8 @@ import { ElNotification } from 'element-plus';
 import { useAppStore } from '@/store';
 import { deleteCourseCategoryApi, findCourseCategoryListByQueryTextAndPaginationApi } from '@/api/course/category';
 import { CourseCategory } from '@/api/course/category/type';
-import CreateCourseCategoryForm from './components/Create.vue';
-import UpdateCourseCategoryForm from './components/Update.vue';
+import CreateCourseCategoryForm from './components/CreateCourseCategory.vue';
+import UpdateCourseCategoryForm from './components/UpdateCourseCategory.vue';
 
 
 

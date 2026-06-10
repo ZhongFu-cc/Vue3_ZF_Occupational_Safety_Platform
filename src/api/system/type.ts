@@ -5,6 +5,8 @@ export interface AddSysUser {
   email: string;
   phone: string;
   companyName: string;
+  departmentId?: string;
+  companyId?: string;
   remark: string;
 }
 
@@ -17,6 +19,7 @@ export interface PutSysUser {
   phone: string;
   companyName: string;
   remark: string;
+  departmentId?: string;
 }
 
 export interface UpdateUserStatus {
@@ -35,6 +38,8 @@ export interface SysUser {
   companyName: string;
   isActive: number;
   remark: string;
+  companyId: string;
+  departmentId: string;
   createBy: string;
   createDate: string;
   updateBy: string;

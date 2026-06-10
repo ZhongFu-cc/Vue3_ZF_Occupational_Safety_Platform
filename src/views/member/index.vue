@@ -62,8 +62,8 @@
 <script setup lang='ts'>
 import BasicComponent from '@/layout/components/Basic/index.vue'
 import Detail from './components/Detail.vue';
-import Update from './components/Update.vue';
-import Create from './components/Create.vue';
+import Update from './components/UpdateMember.vue';
+import Create from './components/CreateMember.vue';
 import type { SysUser, UpdateUserStatus } from '@/api/system/type';
 import { useUserService } from '@/service/UserService';
 import { useAppStore, useUserStore } from '@/store';
@@ -96,9 +96,9 @@ const totalCount = ref<number>(0);
 const userService = useUserService(role.value);
 const userList = ref<SysUser[]>([]);
 
+
 const findChildUserByQueryTextAndPagination = async (page: number, size: number, queryText: string) => {
   const { res, error }: any = await tryCatch(userService.fetchChildUsers(page, size, queryText));
-  console.log(res, error)
   if (error || res.code !== 200) {
     ElNotification({
       title: '錯誤',

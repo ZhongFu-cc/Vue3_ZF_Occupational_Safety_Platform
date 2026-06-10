@@ -1,14 +1,11 @@
 <template>
-  <div class="create-panel">
-    <el-form ref="createFormRef" :model="formData" :rules="rules" label-width="92px" class="create-form" @submit.prevent
-      status-icon>
+  <div class="update-panel">
+    <el-empty v-if="!hasData" description="請先選擇要編輯的用戶" :image-size="100" />
+
+    <el-form v-else ref="updateFormRef" :model="formData" :rules="rules" label-width="92px" class="update-form"
+      @submit.prevent status-icon>
       <el-form-item label="登入帳號" prop="account">
         <el-input v-model="formData.account" placeholder="請輸入登入帳號" clearable />
-      </el-form-item>
-
-      <el-form-item label="密碼" prop="password">
-        <el-input v-model="formData.password" type="password" show-password placeholder="請輸入密碼" clearable
-          autocomplete="new-password" />
       </el-form-item>
 
       <el-form-item label="用戶名稱" prop="realName">
@@ -27,6 +24,11 @@
         <el-input v-model="formData.companyName" placeholder="請輸入公司名稱" clearable />
       </el-form-item>
 
+      <el-form-item label="密碼" prop="password">
+        <el-input v-model="formData.password" type="password" show-password placeholder="請輸入密碼" clearable
+          autocomplete="new-password" />
+      </el-form-item>
+
       <el-form-item label="備註" prop="remark">
         <el-input v-model="formData.remark" type="textarea" :rows="3" maxlength="200" show-word-limit
           placeholder="請輸入備註" />
@@ -34,32 +36,31 @@
 
       <div class="action-row">
         <el-button @click="handleCancel">取消</el-button>
-        <el-button type="primary" :loading="props.submitting" @click="handleSubmit">新增用戶</el-button>
+        <el-button type="primary" :loading="props.submitting" @click="handleSubmit">儲存變更</el-button>
       </div>
     </el-form>
   </div>
 </template>
-
-<script setup lang="ts">
+<script setup lang='ts'>
 import { ElNotification, type FormInstance, type FormRules } from 'element-plus';
-import { reactive, ref } from 'vue';
-import type { AddSysUser } from '@/api/system/type';
+import { computed, reactive, ref, watch } from 'vue';
+import type { PutSysUser, SysUser } from '@/api/system/type';
 import { useUserService } from '@/service/UserService';
 import { tryCatch } from '@/utils/tryCatch';
 
-const props = defineProps<{
-  role: 'admin' | 'company';
-  submitting?: boolean;
-}>();
 
-const emit = defineEmits<{
-  (event: 'submit'): void;
-  (event: 'cancel'): void;
+const props = defineProps<{
+  sysUser: SysUser;
+  submitting?: boolean;
+  role: 'admin' | 'company';
 }>();
 
 const userService = useUserService(props.role);
 
-const EMPTY_FORM: AddSysUser = {
+const emit = defineEmits(['submit', 'cancel']);
+
+const EMPTY_USER: PutSysUser = {
+  sysUserId: '',
   account: '',
   password: '',
   realName: '',
@@ -67,16 +68,16 @@ const EMPTY_FORM: AddSysUser = {
   phone: '',
   companyName: '',
   remark: '',
+  departmentId: '',
 };
 
-const createFormRef = ref<FormInstance>();
-const formData = reactive<AddSysUser>({ ...EMPTY_FORM });
+const updateFormRef = ref<FormInstance>();
+const formData = reactive<PutSysUser>({ ...EMPTY_USER });
 
-const rules = reactive<FormRules<AddSysUser>>({
+const hasData = computed(() => Boolean(props.sysUser?.sysUserId));
+
+const rules = reactive<FormRules<PutSysUser>>({
   account: [{ required: true, message: '請輸入登入帳號', trigger: 'blur' }],
-  password: [{ required: true, message: '請輸入密碼', trigger: 'blur' },
-  { min: 6, message: '密碼至少需要6個字元', trigger: 'blur' },
-  ],
   realName: [{ required: true, message: '請輸入用戶名稱', trigger: 'blur' }],
   email: [
     { required: true, message: '請輸入電子信箱', trigger: 'blur' },
@@ -84,64 +85,68 @@ const rules = reactive<FormRules<AddSysUser>>({
   ],
   phone: [{ required: true, message: '請輸入聯絡電話', trigger: 'blur' }],
   companyName: [{ required: true, message: '請輸入公司名稱', trigger: 'blur' }],
+  password: [{ required: true, message: '請輸入密碼', trigger: 'blur' }],
 });
 
-const resetForm = () => {
-  Object.assign(formData, EMPTY_FORM);
-  createFormRef.value?.clearValidate();
+const syncFormData = (user: SysUser) => {
+  formData.sysUserId = user?.sysUserId ?? '';
+  formData.account = user?.account ?? '';
+  formData.password = user?.password ?? '';
+  formData.realName = user?.realName ?? '';
+  formData.email = user?.email ?? '';
+  formData.phone = user?.phone ?? '';
+  formData.companyName = user?.companyName ?? '';
+  formData.remark = user?.remark ?? '';
 };
 
+watch(
+  () => props.sysUser,
+  (value) => {
+    syncFormData(value || ({} as SysUser));
+    updateFormRef.value?.clearValidate();
+  },
+  { immediate: true, deep: true }
+);
+
 const handleCancel = () => {
-  resetForm();
   emit('cancel');
 };
 
 const handleSubmit = async () => {
-  if (!createFormRef.value) {
+  if (!updateFormRef.value) {
     return;
   }
 
-  const valid = await createFormRef.value.validate().catch(() => false);
+  const valid = await updateFormRef.value.validate().catch(() => false);
   if (!valid) {
     return;
   }
 
-  const { res, error }: any = await tryCatch(userService.createUser({
-    account: formData.account.trim(),
-    password: formData.password,
-    realName: formData.realName.trim(),
-    email: formData.email.trim(),
-    phone: formData.phone.trim(),
-    companyName: formData.companyName.trim(),
-    remark: formData.remark.trim(),
-  }));
-
+  const { res, error }: any = await tryCatch(userService.updateUser(formData));
   if (error || res.code !== 200) {
     ElNotification({
       title: '錯誤',
-      message: '無法新增用戶',
+      message: '無法更新用戶資訊',
       type: 'error',
     });
     return;
   }
 
+  updateFormRef.value.resetFields();
   ElNotification({
     title: '成功',
-    message: '用戶已新增',
+    message: '用戶資訊已更新',
     type: 'success',
   });
-
-  resetForm();
   emit('submit');
 };
 </script>
-
-<style lang="scss" scoped>
-.create-panel {
+<style lang='scss' scoped>
+.update-panel {
   min-height: 220px;
 }
 
-.create-form {
+.update-form {
   padding-top: 8px;
 }
 

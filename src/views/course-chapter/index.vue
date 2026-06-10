@@ -49,8 +49,8 @@
 <script setup lang='ts'>
 import { findCourseChapterListByCourseIdApi } from '@/api/course/chapter';
 import BasicComponent from '@/layout/components/Basic/index.vue';
-import CreateForm from './components/Create.vue';
-import UpdateForm from './components/Update.vue';
+import CreateForm from './components/CreateCourseChapter.vue';
+import UpdateForm from './components/UpdateCourseChapter.vue';
 import type { CourseChapterVO, UpdateCourseChapter } from '@/api/course/chapter/type';
 import { tryCatch } from '@/utils/tryCatch';
 import { ElNotification } from 'element-plus';

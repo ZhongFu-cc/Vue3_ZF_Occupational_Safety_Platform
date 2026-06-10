@@ -56,12 +56,12 @@
 
 <script setup lang="ts">
 import BasicComponent from '@/layout/components/Basic/index.vue';
-import { deleteCourseApi, findCourseListByCateforyIdAndPaginationApi } from '@/api/course/course';
+import { deleteCourseApi, findCourseListByCategoryIdAndPaginationApi } from '@/api/course/course';
 import { tryCatch } from '@/utils/tryCatch';
 import { ElNotification } from 'element-plus';
 import { Course } from '@/api/course/course/type';
-import CreateCourseForm from './components/Create.vue';
-import UpdateCourseForm from './components/Update.vue';
+import CreateCourseForm from './components/CreateCourse.vue';
+import UpdateCourseForm from './components/UpdateCourse.vue';
 import { useAppStore } from '@/store';
 
 
@@ -86,7 +86,7 @@ const fetchCourseList = async () => {
   loading.value = true;
 
   const { res, error }: any = await tryCatch(
-    findCourseListByCateforyIdAndPaginationApi(currentPage.value, pageSize.value, courseCategoryId.value.trim(), queryText.value.trim())
+    findCourseListByCategoryIdAndPaginationApi(currentPage.value, pageSize.value, courseCategoryId.value.trim(), queryText.value.trim())
   );
 
   console.log('API Response:', res);

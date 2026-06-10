@@ -8,7 +8,7 @@ export function findCourseByIdApi(id: string) {
   })
 }
 
-export function findCourseListByCateforyIdAndPaginationApi(page: number, size: number, courseCategoryId: string, queryText?: string) {
+export function findCourseListByCategoryIdAndPaginationApi(page: number, size: number, courseCategoryId: string, queryText?: string) {
   return request({
     url: `${BASE_URL}/pagination`,
     method: 'get',
