@@ -77,7 +77,7 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
     name: "member",
 
     meta: {
-      title: "會員管理",
+      title: "成員管理",
       icon: "el-icon-Avatar",
       keepAlive: true,
       alwaysShow: false,
@@ -88,9 +88,119 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/member/index.vue"),
         name: "memberPage",
         meta: {
-          title: "會員列表",
+          title: "成員列表",
           icon: "el-icon-Avatar",
           hidden: false,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+    ]
+  }, {
+    path: "/job-type",
+    component: Layout,
+    name: "jobType",
+    meta: {
+      title: "職位類型管理",
+      icon: "el-icon-Avatar",
+      keepAlive: true,
+      alwaysShow: false,
+    },
+    children: [
+      {
+        path: "/job-type-page",
+        component: () => import("@/views/jobType/index.vue"),
+        name: "jobTypePage",
+        meta: {
+          title: "職位類型列表",
+          icon: "el-icon-Avatar",
+          hidden: false,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+      {
+        path: "/job-type-course-category/:jobTypeId",
+        component: () => import("@/views/jobType/components/CourseCategory.vue"),
+        name: "jobTypeCategoryPage",
+        meta: {
+          title: "職位類型課程分類",
+          icon: "el-icon-Avatar",
+          hidden: true,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+    ]
+  }, {
+    path: "/company",
+    component: Layout,
+    name: "company",
+    meta: {
+      title: "企業管理",
+      icon: "el-icon-Avatar",
+      keepAlive: true,
+      alwaysShow: false,
+    },
+    children: [
+      {
+        path: "/company-page",
+        component: () => import("@/views/company/index.vue"),
+        name: "companyPage",
+        meta: {
+          title: "企業列表",
+          icon: "el-icon-Avatar",
+          hidden: false,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+    ]
+  },
+  {
+    path: "/course",
+    component: Layout,
+    name: "course",
+
+    meta: {
+      title: "課程管理",
+      icon: "el-icon-Avatar",
+      keepAlive: true,
+      alwaysShow: false,
+    },
+    children: [
+      {
+        path: "/course-category-page",
+        component: () => import("@/views/course-category/index.vue"),
+        name: "courseCategoryPage",
+        meta: {
+          title: "課程分類",
+          icon: "el-icon-Avatar",
+          hidden: false,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+      {
+        path: "/course-page",
+        component: () => import("@/views/course/index.vue"),
+        name: "coursePage",
+        meta: {
+          title: "課程列表",
+          icon: "el-icon-Avatar",
+          hidden: false,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+      {
+        path: "/course-chapter-page/:courseId",
+        component: () => import("@/views/course-chapter/index.vue"),
+        name: "courseChapterPage",
+        meta: {
+          title: "課程章節",
+          icon: "el-icon-Avatar",
+          hidden: true,
           roles: ["ADMIN"],
           keepAlive: true,
         },
@@ -182,6 +292,35 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
 
   }
 
+]
+
+export const companyManagerDynamicRoutes: RouteRecordRaw[] = [
+  {
+    path: "/member",
+    component: Layout,
+    name: "member",
+
+    meta: {
+      title: "成員管理",
+      icon: "el-icon-Avatar",
+      keepAlive: true,
+      alwaysShow: false,
+    },
+    children: [
+      {
+        path: "/member-page",
+        component: () => import("@/views/member/index.vue"),
+        name: "memberPage",
+        meta: {
+          title: "成員列表",
+          icon: "el-icon-Avatar",
+          hidden: false,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+    ]
+  }
 ]
 
 

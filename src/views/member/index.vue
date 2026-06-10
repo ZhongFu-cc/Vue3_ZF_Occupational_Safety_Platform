@@ -5,10 +5,11 @@
     <BasicComponent title="成員管理" :totalCount="totalCount + ' 人'">
       <template #search-box>
         <el-input v-model="queryText" placeholder="搜尋用戶"
-          @input="findChildUserByQueryTextAndPagination(currentPage, pageSize, queryText)"></el-input>
+          @keyup.enter="findChildUserByQueryTextAndPagination(currentPage, pageSize, queryText)"></el-input>
       </template>
 
       <template #option-box>
+        <el-button v-if="role === 'company'">匯入</el-button>
         <el-button type="primary" @click="createDialogState.open">新增用戶</el-button>
       </template>
 
@@ -34,6 +35,11 @@
         </el-table>
       </template>
 
+      <template #pagination-box>
+        <el-pagination layout="prev, pager, next" :current-page="currentPage" :total="Number(totalCount)"
+          @current-change="handlePageChange" />
+      </template>
+
     </BasicComponent>
 
     <el-drawer v-model="detailDrawerState.isOpen" title="用戶詳情" :size="device === 'mobile' ? '90%' : '40%'">
@@ -56,8 +62,8 @@
 <script setup lang='ts'>
 import BasicComponent from '@/layout/components/Basic/index.vue'
 import Detail from './components/Detail.vue';
-import Update from './components/Update.vue';
-import Create from './components/Create.vue';
+import Update from './components/UpdateMember.vue';
+import Create from './components/CreateMember.vue';
 import type { SysUser, UpdateUserStatus } from '@/api/system/type';
 import { useUserService } from '@/service/UserService';
 import { useAppStore, useUserStore } from '@/store';
@@ -90,9 +96,9 @@ const totalCount = ref<number>(0);
 const userService = useUserService(role.value);
 const userList = ref<SysUser[]>([]);
 
+
 const findChildUserByQueryTextAndPagination = async (page: number, size: number, queryText: string) => {
   const { res, error }: any = await tryCatch(userService.fetchChildUsers(page, size, queryText));
-  console.log(res, error)
   if (error || res.code !== 200) {
     ElNotification({
       title: '錯誤',
@@ -209,6 +215,17 @@ const handleDeleteUser = async (sysUserId: string) => {
     // 用戶取消刪除操作
   });
 }
+
+const handlePageChange = (page: number) => {
+  currentPage.value = page;
+  findChildUserByQueryTextAndPagination(currentPage.value, pageSize.value, queryText.value);
+};
+
+const handleSizeChange = (size: number) => {
+  pageSize.value = size;
+  currentPage.value = 1;
+  findChildUserByQueryTextAndPagination(currentPage.value, pageSize.value, queryText.value);
+};
 
 onMounted(() => {
   findChildUserByQueryTextAndPagination(currentPage.value, pageSize.value, queryText.value);

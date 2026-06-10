@@ -21,8 +21,5 @@ export const useUserService = (role: 'admin' | 'company') => {
       updateUserStatus: updateCompanyUserStatusApi,
     },
   }
-
-  console.log(apiMap[role])
-
   return apiMap[role];
 }
