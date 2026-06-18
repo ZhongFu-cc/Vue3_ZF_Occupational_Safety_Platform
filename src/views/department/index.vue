@@ -126,7 +126,7 @@ const createDialogState = reactive({
 const updateDepartmentData = reactive({} as Department);
 const updateDialogState = reactive({
   isOpen: false,
-  open: (row: Department) => {
+  open: (row: any) => {
     updateDialogState.isOpen = true;
     Object.assign(updateDepartmentData, row);
   },
@@ -136,7 +136,7 @@ const updateDialogState = reactive({
 const selectDepartmentId = ref<string>('')
 const addCourseDialogState = reactive({
   isOpen: false,
-  open: (row: Department) => {
+  open: (row: any) => {
     addCourseDialogState.isOpen = true;
     selectDepartmentId.value = row.departmentId
   },

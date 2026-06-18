@@ -133,7 +133,7 @@ const createDialogState = reactive({
 const updateCategory = reactive({} as CourseCategory);
 const updateDialogState = reactive({
   isOpen: false,
-  open: (row: CourseCategory) => {
+  open: (row: any) => {
     updateDialogState.isOpen = true;
     Object.assign(updateCategory, row);
   },
