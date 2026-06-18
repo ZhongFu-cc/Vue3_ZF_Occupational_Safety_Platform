@@ -1,16 +1,16 @@
 <template>
   <div class="update-panel">
-    <el-empty v-if="!hasData" description="請先選擇要編輯的職位類型" :image-size="100" />
+    <el-empty v-if="!hasData" description="請先選擇要編輯的作業類別" :image-size="100" />
 
     <el-form v-else ref="updateFormRef" :model="formData" :rules="rules" label-width="92px" class="update-form"
       @submit.prevent status-icon label-position="top">
 
-      <el-form-item label="請輸入職位類型名稱" prop="name">
-        <el-input v-model="formData.name" placeholder="請輸入職位類型名稱" clearable />
+      <el-form-item label="請輸入作業類別名稱" prop="name">
+        <el-input v-model="formData.name" placeholder="請輸入作業類別名稱" clearable />
       </el-form-item>
 
-      <el-form-item label="請輸入職位類型描述" prop="description">
-        <el-input v-model="formData.description" type="textarea" placeholder="請輸入職位類型描述" clearable />
+      <el-form-item label="請輸入作業類別描述" prop="description">
+        <el-input v-model="formData.description" type="textarea" placeholder="請輸入作業類別描述" clearable />
       </el-form-item>
 
       <el-form-item label="請選擇是否啟用" prop="isActive">
@@ -52,8 +52,8 @@ const formData = reactive<UpdateJobType>({ ...EMPTY_FORM });
 const hasData = computed(() => Boolean(props.jobType?.jobTypeId));
 
 const rules = reactive<FormRules<UpdateJobType>>({
-  name: [{ required: true, message: '請輸入職位類型名稱', trigger: 'blur' }],
-  description: [{ required: true, message: '請輸入職位類型描述', trigger: 'blur' }],
+  name: [{ required: true, message: '請輸入作業類別名稱', trigger: 'blur' }],
+  description: [{ required: true, message: '請輸入作業類別描述', trigger: 'blur' }],
   isActive: [{ required: true, message: '請選擇是否啟用', trigger: 'change' }]
 });
 
@@ -88,7 +88,7 @@ const handleSubmit = async () => {
   if (error || res.code !== 200) {
     ElNotification({
       title: '錯誤',
-      message: '無法更新職位類型資訊',
+      message: '無法更新作業類別資訊',
       type: 'error',
     });
     return;
@@ -97,7 +97,7 @@ const handleSubmit = async () => {
   updateFormRef.value.resetFields();
   ElNotification({
     title: '成功',
-    message: '職位類型資訊已更新',
+    message: '作業類別資訊已更新',
     type: 'success',
   });
   emit('submit');

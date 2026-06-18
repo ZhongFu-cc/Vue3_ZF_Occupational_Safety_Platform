@@ -10,6 +10,13 @@ export function findCompanyCourseByIdApi(id: string) {
   })
 }
 
+export function findAllCompanyCourseListApi() {
+  return request({
+    url: `${BASE_URL}`,
+    method: 'get',
+  })
+}
+
 export function findCompanyCourseListByQueryTextAndPaginationApi(
   page: number,
   size: number,

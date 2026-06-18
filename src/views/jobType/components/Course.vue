@@ -1,38 +1,43 @@
 <template>
   <div>
-    <BasicComponent title="課程類別選擇">
+    <BasicComponent title="課程選擇">
       <template #search-box>
-        <el-input v-model="queryText" placeholder="請輸入課程類別名稱" @keydown.enter="findJobCourseList" />
+        <el-input v-model="queryText" placeholder="請輸入課程名稱" @keydown.enter="findJobCourseList" />
         <el-button type="primary" @click="findJobCourseList">搜尋</el-button>
       </template>
 
       <template #option-box>
-        <el-button type="primary" @click="dialogState.open">新增課程類別</el-button>
+        <el-button type="primary" @click="dialogState.open">新增課程</el-button>
       </template>
 
       <template #data-table>
-        <el-table v-if="hasData" :data="existingJobCourseList">
+        <el-table v-if="hasData" :data="jobCourseList">
           <el-table-column width="150">
             <template #default="{ row }">
               <el-image :src="minioEnv + row.coverImage" fit="cover"></el-image>
             </template>
           </el-table-column>
-          <el-table-column prop="title" label="課程類別名稱"></el-table-column>
-          <el-table-column prop="description" label="課程類別描述"></el-table-column>
+          <el-table-column prop="title" label="課程名稱"></el-table-column>
+          <el-table-column prop="description" label="課程描述"></el-table-column>
           <el-table-column label="是否必要課程">
             <template #default="{ row }">
               <el-switch v-model="row.isMandatory" :active-value="1" :inactive-value="0" active-text="是"
                 inactive-text="否" @click="handleUpdate(row)"></el-switch>
             </template>
           </el-table-column>
+          <el-table-column label="操作">
+            <template #default="{ row }">
+              <el-button type="danger" link @click="deleteCourse(row.jobCourseId)">刪除</el-button>
+            </template>
+          </el-table-column>
         </el-table>
 
-        <el-empty v-else description="暫無課程類別"></el-empty>
+        <el-empty v-else description="暫無課程"></el-empty>
       </template>
     </BasicComponent>
 
     <el-dialog title="新增課程" v-model="dialogState.isOpen" :width="device === 'mobile' ? '100%' : '70%'">
-      <el-select v-model="selectCategoryId" filterable clearable placeholder="請選擇課程類別"
+      <el-select v-model="selectCategoryId" filterable clearable placeholder="請選擇課程"
         @end-reached="fetchCourseCategoryList()" @change="findCourseList">
         <el-option v-for="category in courseCategoryList" :key="category.courseCategoryId" :label="category.name"
           :value="category.courseCategoryId"></el-option>
@@ -58,13 +63,13 @@
       </div>
     </el-dialog>
 
-    <el-dialog v-model="openAddDialogState.isOpen" title="確認新增課程類別" width="30%">
-      <span>確定要將此課程類別新增到職務類別嗎？</span>
+    <el-dialog v-model="openAddDialogState.isOpen" title="確認新增課程" width="30%">
+      <span>確定要將此課程新增到作業類別嗎？</span>
       <el-form-item label="是否為必要課程">
         <el-switch v-model="isMandatory" :active-value="1" :inactive-value="0" active-text="是"
           inactive-text="否"></el-switch>
       </el-form-item>
-      <el-button type="primary" @click="addCourseCategoryToJobType">確認新增</el-button>
+      <el-button type="primary" @click="addCourseToJobType">確認新增</el-button>
       <el-button @click="openAddDialogState.close">取消</el-button>
     </el-dialog>
   </div>
@@ -74,7 +79,7 @@ import { findCourseCategoryListByQueryTextAndPaginationApi } from '@/api/course/
 import { CourseCategory } from '@/api/course/category/type';
 import { findCourseListByCategoryIdAndPaginationApi } from '@/api/course/course';
 import { Course } from '@/api/course/course/type';
-import { createTypeCategoryApi, findJobTypeCourseCategoryByJobTypeIdApi, updateTypeCategoryApi } from '@/api/jobTypeCourse';
+import { createTypeCategoryApi, deleteTypeCategoryByIdApi, findAllJobCourseListApi, findJobTypeCourseCategoryByJobTypeIdApi, updateTypeCategoryApi } from '@/api/jobTypeCourse';
 import { AddTypeCategory, JobCourseVO, UpdateTypeCategory } from '@/api/jobTypeCourse/type';
 import BasicComponent from '@/layout/components/Basic/index.vue'
 import { useAppStore } from '@/store';
@@ -86,30 +91,41 @@ const jobTypeId = ref<string>(useRoute().params.jobTypeId as string)
 const hasData = ref<boolean>(false);
 const device = useAppStore().device
 
-const existingJobCourseList = ref<JobCourseVO[]>([])
+const jobCourseList = ref<JobCourseVO[]>([])
 const currentPage = ref<number>(1)
 const queryText = ref<string>('')
 const existingCourseIds = ref<string[]>([])
 
 
 const findJobCourseList = async () => {
-  console.log('findJobCourseList jobTypeId', jobTypeId.value, 'currentPage', currentPage.value, 'queryText', queryText.value);
   const { res, error }: any = await tryCatch(findJobTypeCourseCategoryByJobTypeIdApi(jobTypeId.value, currentPage.value, 10, queryText.value))
   console.log('findJobCourseList res', res, 'error', error);
   if (error || res.code !== 200) {
     ElNotification({
       title: '錯誤',
-      message: '獲取課程類別列表失敗',
+      message: '獲取課程列表失敗',
       type: 'error',
     })
 
     return
   }
+  jobCourseList.value = res.data.records
+  hasData.value = jobCourseList.value.length > 0
+}
 
-  existingJobCourseList.value = res.data.records
-  existingCourseIds.value = existingJobCourseList.value.map(item => item.courseId)
+const findAllJobCourseList = async () => {
+  const { res, error }: any = await tryCatch(findAllJobCourseListApi(jobTypeId.value))
+  if (error || res.code !== 200) {
+    ElNotification({
+      title: '錯誤',
+      message: '獲取課程列表失敗',
+      type: 'error',
+    })
+
+    return
+  }
+  existingCourseIds.value = res.data.map((item: JobCourseVO) => item.courseId)
   console.log('existingCourseIds', existingCourseIds.value);
-  hasData.value = existingJobCourseList.value.length > 0
 }
 
 // ------------------------------------------------------------
@@ -164,7 +180,7 @@ const openAddDialogState = reactive({
   }
 })
 
-const addCourseCategoryToJobType = async () => {
+const addCourseToJobType = async () => {
   const payload: AddTypeCategory = {
     jobTypeId: jobTypeId.value,
     courseId: addCourseId.value,
@@ -175,7 +191,7 @@ const addCourseCategoryToJobType = async () => {
   if (error || res.code !== 200) {
     ElNotification({
       title: '錯誤',
-      message: '新增課程類別失敗',
+      message: '新增課程失敗',
       type: 'error',
     })
     return;
@@ -183,7 +199,7 @@ const addCourseCategoryToJobType = async () => {
 
   ElNotification({
     title: '成功',
-    message: '新增課程類別成功',
+    message: '新增課程成功',
     type: 'success',
   })
 
@@ -256,9 +272,40 @@ const fetchCourseCategoryList = async (isRefresh = false) => {
   }
 };
 
+const deleteCourse = async (jobCourseId: string) => {
+  ElMessageBox.confirm('確定要刪除這個課程嗎？', '警告', {
+    confirmButtonText: '確定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  }).then(async () => {
+    // 在這裡調用刪除 API
+    const { res, error }: any = await tryCatch(deleteTypeCategoryByIdApi(jobCourseId));
+    if (error || res.code !== 200) {
+      ElNotification({
+        title: '錯誤',
+        message: '刪除課程失敗',
+        type: 'error',
+      });
+      return;
+    }
+
+    ElNotification({
+      title: '成功',
+      message: '刪除課程成功',
+      type: 'success',
+    });
+
+    // 刪除成功後重新獲取列表
+    await findJobCourseList();
+  }).catch(() => {
+    // 使用者取消刪除
+  });
+
+}
 onMounted(() => {
   findJobCourseList()
   fetchCourseCategoryList()
+  findAllJobCourseList()
 })
 </script>
 <style lang="scss" scoped>

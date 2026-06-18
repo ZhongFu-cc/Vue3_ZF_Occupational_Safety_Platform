@@ -2,12 +2,12 @@
   <div class="create-panel">
     <el-form ref="createFormRef" :model="formData" :rules="rules" label-width="92px" class="create-form" @submit.prevent
       status-icon label-position="top">
-      <el-form-item label="職位類型名稱" prop="name">
-        <el-input v-model="formData.name" placeholder="請輸入職位類型名稱" clearable />
+      <el-form-item label="作業類別名稱" prop="name">
+        <el-input v-model="formData.name" placeholder="請輸入作業類別名稱" clearable />
       </el-form-item>
 
-      <el-form-item label="職位類型描述" prop="description">
-        <el-input v-model="formData.description" type="textarea" placeholder="請輸入職位類型描述" clearable />
+      <el-form-item label="作業類別描述" prop="description">
+        <el-input v-model="formData.description" type="textarea" placeholder="請輸入作業類別描述" clearable />
       </el-form-item>
 
       <el-form-item label="是否啟用" prop="isActive">
@@ -49,8 +49,8 @@ const createFormRef = ref<FormInstance>();
 const formData = reactive<AddJobType>({ ...EMPTY_FORM });
 
 const rules = reactive<FormRules<AddJobType>>({
-  name: [{ required: true, message: '請輸入職位類型名稱', trigger: 'blur' }],
-  description: [{ required: true, message: '請輸入職位類型描述', trigger: 'blur' }]
+  name: [{ required: true, message: '請輸入作業類別名稱', trigger: 'blur' }],
+  description: [{ required: true, message: '請輸入作業類別描述', trigger: 'blur' }]
 });
 
 
@@ -79,7 +79,7 @@ const handleSubmit = async () => {
   if (error || res.code !== 200) {
     ElNotification({
       title: '錯誤',
-      message: '無法新增職位類型',
+      message: '無法新增作業類別',
       type: 'error',
     });
     return;
@@ -87,7 +87,7 @@ const handleSubmit = async () => {
 
   ElNotification({
     title: '成功',
-    message: '職位類型已新增',
+    message: '作業類別已新增',
     type: 'success',
   });
 

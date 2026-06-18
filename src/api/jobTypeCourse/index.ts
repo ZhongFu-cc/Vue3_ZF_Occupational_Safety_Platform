@@ -16,6 +16,16 @@ export function findJobTypeCourseCategoryByJobTypeIdApi(jobTypeId: string, page:
   })
 }
 
+export function findAllJobCourseListApi(jobTypeId: string) {
+  return request({
+    url: `${BASE_URL}`,
+    method: 'get',
+    params: {
+      jobTypeId
+    }
+  })
+}
+
 
 export function createTypeCategoryApi(data: AddTypeCategory) {
   return request({
@@ -33,9 +43,9 @@ export function updateTypeCategoryApi(data: UpdateTypeCategory) {
   })
 }
 
-export function deleteTypeCategoryByIdApi(typeCategoryId: string) {
+export function deleteTypeCategoryByIdApi(typeCourseId: string) {
   return request({
-    url: `${BASE_URL}/${typeCategoryId}`,
+    url: `${BASE_URL}/${typeCourseId}`,
     method: 'delete'
   })
 }
