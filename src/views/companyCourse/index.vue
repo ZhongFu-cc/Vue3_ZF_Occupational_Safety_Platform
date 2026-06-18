@@ -16,7 +16,7 @@
       <template #data-table>
         <el-table v-loading="loading" :data="companyCourseList" empty-text="暫無公司課程資料">
           <el-table-column>
-            <template #default="{ row }: { row: CompanyCourseVO }">
+            <template #default="{ row }">
               <el-image :src="minioEnv + row.coverImage" fit="cover"></el-image>
 
             </template>
@@ -25,7 +25,7 @@
           <el-table-column prop="description" label="描述" min-width="180" :show-overflow-tooltip="true" />
           <el-table-column prop="totalMinutes" label="課程時數(分鐘)" min-width="80" :show-overflow-tooltip="true" />
           <el-table-column label="操作" width="180" align="center">
-            <template #default="{ row }: { row: CompanyCourseVO }">
+            <template #default="{ row }">
               <el-button type="danger" link @click="deleteCourse(row.companyCourseId)">刪除</el-button>
             </template>
           </el-table-column>

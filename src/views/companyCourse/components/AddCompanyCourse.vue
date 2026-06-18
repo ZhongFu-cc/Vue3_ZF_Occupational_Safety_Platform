@@ -8,14 +8,14 @@
     </el-select>
     <el-table ref="tableRef" :data="courseList">
       <el-table-column width="150">
-        <template #default="{ row }: { row: Course }">
+        <template #default="{ row }">
           <el-image :src="minioEnv + row.coverImage" fit="cover"></el-image>
         </template>
       </el-table-column>
       <el-table-column prop="title" label="課程名稱"></el-table-column>
       <el-table-column prop="description" label="課程描述"></el-table-column>
       <el-table-column label="操作" width="100">
-        <template #default="{ row }: { row: Course }">
+        <template #default="{ row }">
           <el-button type="primary" @click="openAddDialogState.open(row.courseId)"
             :disabled="existCompanyCourseIdList.includes(row.courseId)">新增</el-button>
         </template>

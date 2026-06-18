@@ -18,17 +18,17 @@
           <el-table-column prop="title" label="課程名稱" min-width="180" :show-overflow-tooltip="true" />
           <el-table-column prop="description" label="課程描述" min-width="220" :show-overflow-tooltip="true" />
           <el-table-column label="課程時長(分鐘)" width="130" align="center">
-            <template #default="{ row }: { row: Course }">
+            <template #default="{ row }">
               {{ displayTotalMinute(row.totalMinutes) }}
             </template>
           </el-table-column>
           <el-table-column label="狀態" width="120" align="center">
-            <template #default="{ row }: { row: Course }">
+            <template #default="{ row }">
               <el-switch v-model="row.isActive" :active-value="1" :inactive-value="0"></el-switch>
             </template>
           </el-table-column>
           <el-table-column label="操作" width="180" align="center">
-            <template #default="{ row }: { row: Course }">
+            <template #default="{ row }">
               <el-button type="primary" link @click="() => updateDialogState.open(row)">編輯</el-button>
               <el-button type="warning" link @click="() => toChapter(row.courseId)">章節</el-button>
               <el-button type="danger" link @click="() => deleteCourse(row.courseId)">刪除</el-button>
