@@ -101,7 +101,7 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
     component: Layout,
     name: "jobType",
     meta: {
-      title: "職位類型管理",
+      title: "作業類別管理",
       icon: "el-icon-Avatar",
       keepAlive: true,
       alwaysShow: false,
@@ -112,7 +112,7 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/jobType/index.vue"),
         name: "jobTypePage",
         meta: {
-          title: "職位類型列表",
+          title: "作業類別列表",
           icon: "el-icon-Avatar",
           hidden: false,
           roles: ["ADMIN"],
@@ -120,11 +120,11 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
         },
       },
       {
-        path: "/job-type-course-category/:jobTypeId",
-        component: () => import("@/views/jobType/components/CourseCategory.vue"),
-        name: "jobTypeCategoryPage",
+        path: "/job-type-course/:jobTypeId",
+        component: () => import("@/views/jobType/components/Course.vue"),
+        name: "jobTypeCoursePage",
         meta: {
-          title: "職位類型課程分類",
+          title: "作業類別課程分類",
           icon: "el-icon-Avatar",
           hidden: true,
           roles: ["ADMIN"],
@@ -171,7 +171,7 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
     children: [
       {
         path: "/course-category-page",
-        component: () => import("@/views/course-category/index.vue"),
+        component: () => import("@/views/courseCategory/index.vue"),
         name: "courseCategoryPage",
         meta: {
           title: "課程分類",
@@ -195,7 +195,7 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
       },
       {
         path: "/course-chapter-page/:courseId",
-        component: () => import("@/views/course-chapter/index.vue"),
+        component: () => import("@/views/courseChapter/index.vue"),
         name: "courseChapterPage",
         meta: {
           title: "課程章節",
@@ -207,17 +207,6 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
       },
     ]
   },
-
-
-
-
-
-
-
-
-  //--------- 檔案中心 ------------------
-
-
 
   /**--------------- 自定義表單 -----------------  */
   {
@@ -313,6 +302,54 @@ export const companyManagerDynamicRoutes: RouteRecordRaw[] = [
         name: "memberPage",
         meta: {
           title: "成員列表",
+          icon: "el-icon-Avatar",
+          hidden: false,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+    ]
+  }, {
+    path: "/department-management",
+    component: Layout,
+    name: "departmentManagement",
+    meta: {
+      title: "部門管理",
+      icon: "el-icon-Avatar",
+      keepAlive: true,
+      alwaysShow: false,
+    },
+    children: [
+      {
+        path: "/department-page",
+        component: () => import("@/views/department/index.vue"),
+        name: "departmentPage",
+        meta: {
+          title: "部門列表",
+          icon: "el-icon-Avatar",
+          hidden: false,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+    ]
+  }, {
+    path: "/company-course",
+    component: Layout,
+    name: "companyCourse",
+    meta: {
+      title: "公司課程管理",
+      icon: "el-icon-Avatar",
+      keepAlive: true,
+      alwaysShow: false,
+    },
+    children: [
+      {
+        path: "/company-course-page",
+        component: () => import("@/views/companyCourse/index.vue"),
+        name: "companyCoursePage",
+        meta: {
+          title: "公司課程列表",
           icon: "el-icon-Avatar",
           hidden: false,
           roles: ["ADMIN"],

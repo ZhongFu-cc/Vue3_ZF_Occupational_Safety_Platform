@@ -1,13 +1,13 @@
 <template>
   <div>
-    <BasicComponent title="職位類型管理">
+    <BasicComponent title="作業類別管理">
       <template #option-box>
-        <el-button type="primary" @click="createDialogState.open">新增職位類型</el-button>
+        <el-button type="primary" @click="createDialogState.open">新增作業類別</el-button>
       </template>
       <template #data-table>
         <el-table :data="jobTypeList">
-          <el-table-column prop="name" label="職位類型名稱" :show-overflow-tooltip="true" />
-          <el-table-column prop="description" label="職位類型描述" />
+          <el-table-column prop="name" label="作業類別名稱" :show-overflow-tooltip="true" />
+          <el-table-column prop="description" label="作業類別描述" />
           <el-table-column label="是否啟用">
             <template #default="{ row }">
               <el-tag :type="row.isActive === 1 ? 'success' : 'danger'">{{ row.isActive === 1 ? '啟用' : '停用' }}</el-tag>
@@ -17,18 +17,18 @@
             <template #default="{ row }">
               <el-button type="primary" link @click="updateDialogState.open(row)">編輯</el-button>
               <el-button type="danger" link @click="deleteJobTypeById(row.id)">刪除</el-button>
-              <el-button type="warning" link @click="goToCourseType(row.jobTypeId)">課程類別</el-button>
+              <el-button type="warning" link @click="goToCourseType(row.jobTypeId)">課程</el-button>
             </template>
           </el-table-column>
         </el-table>
       </template>
     </BasicComponent>
 
-    <el-dialog v-model="createDialogState.isOpen" title="新增職位">
+    <el-dialog v-model="createDialogState.isOpen" title="新增作業類別">
       <CreateForm @close="createDialogState.close" @created="findAllJobTypeByQueryTextAndPagination" />
     </el-dialog>
 
-    <el-drawer v-model="updateDialogState.isOpen" title="編輯職位類型">
+    <el-drawer v-model="updateDialogState.isOpen" title="編輯作業類別">
       <UpdateForm :jobType="updateJobType" :submitting="updateDialogState.submitting" @cancel="updateDialogState.close"
         @submit="findAllJobTypeByQueryTextAndPagination" />
     </el-drawer>
@@ -57,7 +57,7 @@ const findAllJobTypeByQueryTextAndPagination = async () => {
   if (error || res.code !== 200) {
     ElNotification({
       type: 'error',
-      message: '獲取職位類型列表失敗',
+      message: '獲取作業類別列表失敗',
       duration: 5000
     })
     return
@@ -69,7 +69,7 @@ const findAllJobTypeByQueryTextAndPagination = async () => {
 }
 
 const deleteJobTypeById = async (id: string) => {
-  ElMessageBox.confirm('確定要刪除該職位類型嗎？', '提示', {
+  ElMessageBox.confirm('確定要刪除該作業類別嗎？', '提示', {
     confirmButtonText: '確定',
     cancelButtonText: '取消',
     type: 'warning'
@@ -78,7 +78,7 @@ const deleteJobTypeById = async (id: string) => {
     if (error || res.code !== 200) {
       ElNotification({
         type: 'error',
-        message: '刪除職位類型失敗',
+        message: '刪除作業類別失敗',
         duration: 5000
       })
       return
@@ -86,7 +86,7 @@ const deleteJobTypeById = async (id: string) => {
 
     ElNotification({
       type: 'success',
-      message: '刪除職位類型成功',
+      message: '刪除作業類別成功',
       duration: 5000
     })
     findAllJobTypeByQueryTextAndPagination()
@@ -121,7 +121,7 @@ const updateDialogState = reactive({
 })
 
 const goToCourseType = (jobTypeId: string) => {
-  router.push(`/job-type-course-category/${jobTypeId}`);
+  router.push(`/job-type-course/${jobTypeId}`);
 }
 
 onMounted(() => {

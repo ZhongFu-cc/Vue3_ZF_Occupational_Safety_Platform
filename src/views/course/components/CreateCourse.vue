@@ -103,6 +103,8 @@ const rules = reactive<FormRules<AddCourse>>({
 const resetForm = () => {
   Object.assign(formData, INITIAL_FORM);
   createFormRef.value?.clearValidate();
+  imageUrl.value = '';
+  imgFile = {} as UploadRawFile;
 };
 
 const handleCancel = () => {

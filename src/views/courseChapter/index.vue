@@ -29,6 +29,12 @@
               <el-button type="danger" link><el-icon>
                   <Delete />
                 </el-icon><span>刪除</span></el-button>
+              <el-button v-if="row.contentType === 'video'" type="success" link
+                @click="videoUploadDialogState.open(row)">
+                <el-icon>
+                  <Upload />
+                </el-icon><span>上傳</span>
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -44,6 +50,10 @@
       <UpdateForm @submit="updateDialogState.close" @cancel="updateDialogState.close" :course-id="courseId"
         :chapter-list="courseChapterSelectList" :course-chapter="updateChapter" />
     </el-dialog>
+
+    <el-dialog v-model="videoUploadDialogState.isOpen" title="上傳影片" destroy-on-close>
+      <VideoUploader :course-chapter-id="selectCourseChapterId" @close="videoUploadDialogState.close" />
+    </el-dialog>
   </div>
 </template>
 <script setup lang='ts'>
@@ -51,6 +61,7 @@ import { findCourseChapterListByCourseIdApi } from '@/api/course/chapter';
 import BasicComponent from '@/layout/components/Basic/index.vue';
 import CreateForm from './components/CreateCourseChapter.vue';
 import UpdateForm from './components/UpdateCourseChapter.vue';
+import VideoUploader from './components/VideoUploader.vue';
 import type { CourseChapterVO, UpdateCourseChapter } from '@/api/course/chapter/type';
 import { tryCatch } from '@/utils/tryCatch';
 import { ElNotification } from 'element-plus';
@@ -123,6 +134,18 @@ const updateDialogState = reactive({
   close: () => {
     updateDialogState.isOpen = false;
     getCourseChapterList()
+  },
+})
+
+const selectCourseChapterId = ref<string>('')
+const videoUploadDialogState = reactive({
+  isOpen: false,
+  open: (row: CourseChapterVO) => {
+    selectCourseChapterId.value = row.courseChapterId
+    videoUploadDialogState.isOpen = true
+  },
+  close: () => {
+    videoUploadDialogState.isOpen = false
   },
 })
 

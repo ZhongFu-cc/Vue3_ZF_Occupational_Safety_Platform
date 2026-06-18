@@ -2,7 +2,6 @@ import request from "@/utils/request";
 import fileRequest from "@/utils/largeFileRequest";
 
 export async function hashFile(file: File) {
-  let startTime = new Date().getTime();
   const chuckSize = 10 * 1024 * 1024; // 10 MB
 
   // 初始化 chunk array 用於存放分割的文件
@@ -62,44 +61,12 @@ export async function hashFile(file: File) {
   };
 
   return res;
-
-  // if (!res.data.exist) {
-
-  //   const MAX_CONCURRENT = 5; // 設置最大併發數量
-  //   const uploadChunk = async (chunk: Blob, index: number) => {
-  //     // 設置要回傳的 chunk info
-  //     const data = {
-  //       fileName: file.name,
-  //       fileType: file.type,
-  //       fileSha256: hash,
-  //       chunkIndex: index,
-  //       totalChunks: chunks.length,
-  //     };
-
-  //     const formData = new FormData();
-  //     formData.append("file", chunk);
-  //     formData.append("data", JSON.stringify(data));
-  //     await slideUpload(formData);
-  //   };
-
-  //   // 將 chunks 陣列中的每個 chunk 轉換為 Promise
-  //   const uploadTasks = chunks.map(
-  //     (chunk, index) => () => uploadChunk(chunk, index)
-  //   );
-  //   await limitConcurrency(uploadTasks, MAX_CONCURRENT);
-  // } else {
-  //   let baseUrl = import.meta.env.VITE_MINIO_API_URL;
-  //   let url = `${baseUrl}/topbs2025/${res.data.path}`;
-  //   window.open(url, "_blank");
-  // }
-
-  // return hash;
 }
 
 /**
  * 將 Blob 轉換為 ArrayBuffer
  * @param blob 傳入 Blob 對象 (chunks)
- * @returns
+ * @returns ArrayBuffer 用於後續的哈希計算
  */
 async function readBinaryFile(blob: Blob) {
   return new Promise((resolve, reject) => {
@@ -142,9 +109,9 @@ function arrayBufferToHex(buffer: Uint8Array): string {
     .join("");
 }
 
-export async function slideCheck(data: string) {
+export async function checkFileIsExist(endpoint: string, data: string) {
   let res = await request({
-    url: "/paper/slide-check",
+    url: endpoint,
     method: "get",
     params: {
       sha256: data,
@@ -153,12 +120,14 @@ export async function slideCheck(data: string) {
   return res;
 }
 
-export async function slideUpload(
+export async function fileUpload(
   checkResult: any,
   file: File,
   hash: string,
   chunks: Blob[],
-  percentage: Ref<number>
+  percentage: Ref<number>,
+  endpoint: string,
+  courseChapterId: string
 ) {
   if (!checkResult.data.exist) {
 
@@ -173,12 +142,21 @@ export async function slideUpload(
         totalChunks: chunks.length,
       };
 
+      console.log(courseChapterId)
+
       const formData = new FormData();
+      const payload = {
+        courseChapterId,
+        chunkUploadDTO: data,
+      }
+
+
+
       formData.append("file", chunk);
-      formData.append("data", JSON.stringify(data));
+      formData.append("data", JSON.stringify(payload));
       if (data == null) {
       }
-      await slideUploadApi(formData);
+      await slideUploadApi(formData, endpoint);
     };
 
     // 將 chunks 陣列中的每個 chunk 轉換為 Promise
@@ -195,9 +173,9 @@ export async function slideUpload(
   }
 }
 
-function slideUploadApi(data: any) {
+function slideUploadApi(data: any, endpoint: string) {
   return fileRequest({
-    url: "/paper/slide-upload",
+    url: endpoint,
     method: "post",
     data,
   });

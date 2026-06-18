@@ -105,6 +105,9 @@ const fetchCourseList = async () => {
   console.log('課程列表資料:', res?.data);
   courseList.value = Array.isArray(res?.data?.records) ? res.data.records : [];
   totalCount.value = Number(res?.data?.total ?? 0);
+
+  createDialogState.close();
+  updateDialogState.close();
 };
 
 const handleSearch = () => {

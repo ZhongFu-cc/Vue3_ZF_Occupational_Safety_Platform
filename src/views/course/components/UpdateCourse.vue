@@ -5,7 +5,7 @@
     <el-form v-else ref="updateFormRef" :model="formData" :rules="rules" class="update-form" label-position="top"
       @submit.prevent status-icon>
       <el-form-item class="upload-box">
-        <img :src="minioAPI + props.course?.coverImage" alt="">
+        <!-- <img class="cover-image" :src="minioAPI + props.course?.coverImage" alt=""> -->
         <el-upload class="thumbnail-uploader" :action="envAPI + '/upload/img'" :show-file-list="false"
           :on-success="handleImageUpload">
           <img v-if="imageUrl" :src="imageUrl" class="avatar" />
@@ -180,6 +180,11 @@ const handleSubmit = async () => {
   text-align: center;
 }
 
+.cover-image {
+  width: 178px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
 
 .thumbnail-uploader {
   .avatar {
