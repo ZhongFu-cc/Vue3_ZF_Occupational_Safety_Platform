@@ -9,6 +9,7 @@ export function findCourseByIdApi(id: string) {
 }
 
 export function findCourseListByCategoryIdAndPaginationApi(page: number, size: number, courseCategoryId: string, queryText?: string) {
+  console.log('findCourseListByCategoryIdAndPaginationApi called with:', { page, size, courseCategoryId, queryText });
   return request({
     url: `${BASE_URL}/pagination`,
     method: 'get',
