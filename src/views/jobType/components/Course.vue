@@ -33,6 +33,11 @@
         </el-table>
 
         <el-empty v-else description="暫無課程"></el-empty>
+
+        <div class="pagination-box">
+          <el-pagination layout="prev, pager, next" :total="Number(jobCourseTotal)"
+            @current-change="handleJobCoursePageChange" />
+        </div>
       </template>
     </BasicComponent>
 
@@ -96,7 +101,7 @@ const currentPage = ref<number>(1)
 const queryText = ref<string>('')
 const existingCourseIds = ref<string[]>([])
 
-
+const jobCourseTotal = ref<number>(0)
 const findJobCourseList = async () => {
   const { res, error }: any = await tryCatch(findJobTypeCourseCategoryByJobTypeIdApi(jobTypeId.value, currentPage.value, 10, queryText.value))
   console.log('findJobCourseList res', res, 'error', error);
@@ -126,6 +131,11 @@ const findAllJobCourseList = async () => {
   }
   existingCourseIds.value = res.data.map((item: JobCourseVO) => item.courseId)
   console.log('existingCourseIds', existingCourseIds.value);
+}
+
+const handleJobCoursePageChange = (page: number) => {
+  currentPage.value = page
+  findJobCourseList()
 }
 
 // ------------------------------------------------------------
