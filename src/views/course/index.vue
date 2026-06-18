@@ -3,7 +3,7 @@
     <BasicComponent title="課程管理" :totalCount="`${totalCount} 筆`">
       <template #search-box>
         <div class="search-box">
-          <el-input v-model="courseCategoryId" placeholder="請輸入課程分類 ID（可留空）" clearable @keyup.enter="handleSearch" />
+          <el-input v-model="queryText" placeholder="請輸入課程分類 ID（可留空）" clearable @keyup.enter="handleSearch" />
           <el-button type="primary" :loading="loading" @click="handleSearch">查詢</el-button>
           <el-button @click="handleReset">重置</el-button>
         </div>
@@ -84,6 +84,7 @@ const displayTotalMinute = (value?: number) => {
 
 const fetchCourseList = async () => {
   loading.value = true;
+  console.log(courseCategoryId.value, queryText.value);
 
   const { res, error }: any = await tryCatch(
     findCourseListByCategoryIdAndPaginationApi(currentPage.value, pageSize.value, courseCategoryId.value.trim(), queryText.value.trim())

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <BasicComponent title="課程選擇">
+    <BasicComponent :title="`課程選擇 - ${jobType?.name}`">
       <template #search-box>
         <el-input v-model="queryText" placeholder="請輸入課程名稱" @keydown.enter="findJobCourseList" />
         <el-button type="primary" @click="findJobCourseList">搜尋</el-button>
@@ -84,6 +84,8 @@ import { findCourseCategoryListByQueryTextAndPaginationApi } from '@/api/course/
 import { CourseCategory } from '@/api/course/category/type';
 import { findCourseListByCategoryIdAndPaginationApi } from '@/api/course/course';
 import { Course } from '@/api/course/course/type';
+import { findJobTypeByIdApi } from '@/api/jobType';
+import { JobType } from '@/api/jobType/type';
 import { createTypeCategoryApi, deleteTypeCategoryByIdApi, findAllJobCourseListApi, findJobTypeCourseCategoryByJobTypeIdApi, updateTypeCategoryApi } from '@/api/jobTypeCourse';
 import { AddTypeCategory, JobCourseVO, UpdateTypeCategory } from '@/api/jobTypeCourse/type';
 import BasicComponent from '@/layout/components/Basic/index.vue'
@@ -101,6 +103,23 @@ const currentPage = ref<number>(1)
 const queryText = ref<string>('')
 const existingCourseIds = ref<string[]>([])
 
+const jobType = ref<JobType>()
+const findJobType = async () => {
+  const { res, error }: any = await tryCatch(findJobTypeByIdApi(jobTypeId.value))
+  console.log('findJobType res', res, 'error', error);
+  if (error || res.code !== 200) {
+    ElNotification({
+      title: '錯誤',
+      message: '獲取作業類別失敗',
+      type: 'error',
+    })
+
+    return
+  }
+  jobType.value = res.data
+}
+
+
 const jobCourseTotal = ref<number>(0)
 const findJobCourseList = async () => {
   const { res, error }: any = await tryCatch(findJobTypeCourseCategoryByJobTypeIdApi(jobTypeId.value, currentPage.value, 10, queryText.value))
@@ -115,7 +134,9 @@ const findJobCourseList = async () => {
     return
   }
   jobCourseList.value = res.data.records
+  jobCourseTotal.value = res.data.total
   hasData.value = jobCourseList.value.length > 0
+  findAllJobCourseList()
 }
 
 const findAllJobCourseList = async () => {
@@ -312,10 +333,12 @@ const deleteCourse = async (jobCourseId: string) => {
   });
 
 }
+
 onMounted(() => {
   findJobCourseList()
   fetchCourseCategoryList()
   findAllJobCourseList()
+  findJobType()
 })
 </script>
 <style lang="scss" scoped>

@@ -47,7 +47,6 @@ import UpdateForm from './components/UpdateJobType.vue'
 const router = useRouter()
 
 const jobTypeList = ref<JobType[]>([])
-
 const queryText = ref<string>('')
 const currentPage = ref<number>(1)
 

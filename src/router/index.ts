@@ -75,7 +75,7 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
     path: "/member",
     component: Layout,
     name: "member",
-
+    redirect: "/member-page",
     meta: {
       title: "成員管理",
       icon: "el-icon-Avatar",
@@ -100,6 +100,7 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
     path: "/job-type",
     component: Layout,
     name: "jobType",
+    redirect: "/job-type-page",
     meta: {
       title: "作業類別管理",
       icon: "el-icon-Avatar",
@@ -161,7 +162,7 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
     path: "/course",
     component: Layout,
     name: "course",
-
+    redirect: "/course-category-page",
     meta: {
       title: "課程管理",
       icon: "el-icon-Avatar",
