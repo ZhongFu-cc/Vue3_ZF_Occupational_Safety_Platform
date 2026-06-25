@@ -3,7 +3,7 @@
     <el-upload ref="upload" class="upload-demo" :limit="1" :on-change="handleUpload" :auto-upload="false"
       :on-exceed="handleExceed">
       <el-button size="small" type="primary">Upload</el-button>
-      <div slot="tip" class="el-upload__tip">only upload word file with size less than 20mb</div>
+      <div slot="tip" class="el-upload__tip">only upload mp4 file with size less than 200MB</div>
     </el-upload>
 
     <el-progress :percentage="percentage" :stroke-width="15" striped striped-flow />
@@ -14,7 +14,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { type UploadProps, type UploadUserFile, type UploadFile, type UploadFiles, type UploadInstance, type UploadRawFile, genFileId } from 'element-plus';
+import { type UploadProps, type UploadUserFile, type UploadFile, type UploadFiles, type UploadInstance, type UploadRawFile, genFileId, ElNotification } from 'element-plus';
 import { hashFile, checkFileIsExist, fileUpload } from '@/utils/largeFileUpload';
 import { hash } from 'crypto';
 
@@ -39,16 +39,35 @@ const totalChunks = ref<number>(0)
 const percentage = ref<number>(0)
 
 
-
+const FILE_SIZE_LIMIT = 200 * 1024 * 1024; // 200MB
+const FILE_TYPE = 'video/mp4'
 
 const handleUpload: UploadProps['onChange'] = async (file: UploadUserFile, uploadFiles) => {
   if (file.size == 0) {
-    ElMessage.error('File is empty');
+    ElNotification.error({
+      title: 'Error',
+      message: 'File size cannot be 0',
+    });
     return false;
   }
 
-
   if (file.status === 'ready' && file.size && file.raw) {
+    if (file.raw.size > FILE_SIZE_LIMIT) {
+      ElNotification.error({
+        title: 'Error',
+        message: 'File size exceeds the limit of 200MB',
+      });
+      return false;
+    }
+
+    if (file.raw.type !== FILE_TYPE) {
+      ElNotification.error({
+        title: 'Error',
+        message: 'File type must be mp4',
+      });
+      return false;
+    }
+
     percentage.value = 0;
     percentage.value += 1;
     let res = await hashFile(file.raw)

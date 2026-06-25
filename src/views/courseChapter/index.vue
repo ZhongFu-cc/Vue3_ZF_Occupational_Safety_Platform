@@ -140,7 +140,7 @@ const updateDialogState = reactive({
 const selectCourseChapterId = ref<string>('')
 const videoUploadDialogState = reactive({
   isOpen: false,
-  open: (row: CourseChapterVO) => {
+  open: (row: any) => {
     selectCourseChapterId.value = row.courseChapterId
     videoUploadDialogState.isOpen = true
   },

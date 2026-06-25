@@ -56,3 +56,10 @@ export function assignCourseToDepartmentApi(data: AddDepartmentCourse) {
     data,
   });
 }
+
+export function oneClickEnrollmentApi() {
+  return request({
+    url: `${BASE_URL}/one-click-enrollment`,
+    method: "post",
+  });
+}

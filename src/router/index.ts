@@ -314,6 +314,7 @@ export const companyManagerDynamicRoutes: RouteRecordRaw[] = [
     path: "/department-management",
     component: Layout,
     name: "departmentManagement",
+    redirect: "/department-page",
     meta: {
       title: "部門管理",
       icon: "el-icon-Avatar",
@@ -333,11 +334,24 @@ export const companyManagerDynamicRoutes: RouteRecordRaw[] = [
           keepAlive: true,
         },
       },
+      {
+        path: "/department-course-page/:departmentId",
+        component: () => import("@/views/department/addCourse.vue"),
+        name: "departmentCoursePage",
+        meta: {
+          title: "部門課程列表",
+          icon: "el-icon-Avatar",
+          hidden: true,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+
     ]
   }, {
-    path: "/company-course",
+    path: "/company-course-management",
     component: Layout,
-    name: "companyCourse",
+    name: "companyCourseManagement",
     meta: {
       title: "公司課程管理",
       icon: "el-icon-Avatar",
@@ -346,8 +360,8 @@ export const companyManagerDynamicRoutes: RouteRecordRaw[] = [
     },
     children: [
       {
-        path: "/company-course-page",
-        component: () => import("@/views/companyCourse/index.vue"),
+        path: "/company-course-management-page",
+        component: () => import("@/views/companyCourseManagement/index.vue"),
         name: "companyCoursePage",
         meta: {
           title: "公司課程列表",
@@ -359,6 +373,115 @@ export const companyManagerDynamicRoutes: RouteRecordRaw[] = [
       },
     ]
   }
+]
+
+export const userDynamicRoutes: RouteRecordRaw[] = [
+  {
+    path: "/my-course",
+    component: Layout,
+    name: "myCourse",
+    redirect: "/my-course-page",
+    meta: {
+      title: "已報名課程",
+      icon: "el-icon-Avatar",
+      keepAlive: true,
+      alwaysShow: false,
+    },
+    children: [
+      {
+        path: "/my-course-page",
+        component: () => import("@/views/courseEnrollment/index.vue"),
+        name: "myCoursePage",
+        meta: {
+          title: "已報名課程列表",
+          icon: "el-icon-Avatar",
+          hidden: false,
+          roles: ["USER"],
+          keepAlive: true,
+        },
+      }
+    ]
+  },
+  {
+    path: "/learning-record",
+    component: Layout,
+    name: "learningRecord",
+    redirect: "/learning-record-page",
+    meta: {
+      title: "學習歷程",
+      icon: "el-icon-Avatar",
+      keepAlive: true,
+      alwaysShow: false,
+    },
+    children: [
+      {
+        path: "/learning-record-page",
+        component: () => import("@/views/learningRecord/index.vue"),
+        name: "learningRecordPage",
+        meta: {
+          title: "學習歷程",
+          icon: "el-icon-Avatar",
+          hidden: false,
+          roles: ["USER"],
+          keepAlive: true,
+        },
+      }
+    ]
+  },
+  {
+    path: "/course-learn",
+    component: Layout,
+    name: "courseLearn",
+    redirect: "/course-learn-page",
+    meta: {
+      title: "課程學習",
+      icon: "el-icon-Avatar",
+      keepAlive: true,
+      alwaysShow: false,
+      hidden: true,
+    },
+    children: [
+      {
+        path: "/course-learn-page/:courseId",
+        component: () => import("@/views/learn/index.vue"),
+        name: "courseLearnPage",
+        meta: {
+          title: "課程學習",
+          icon: "el-icon-Avatar",
+          hidden: true,
+          roles: ["USER"],
+          keepAlive: true,
+        },
+      }
+    ]
+  }
+  // {
+  //   path: "/company-course",
+  //   component: Layout,
+  //   name: "companyCourse",
+  //   redirect: "/company-course-page",
+  //   meta: {
+  //     title: "所有課程",
+  //     icon: "el-icon-Avatar",
+  //     keepAlive: true,
+  //     alwaysShow: false,
+  //   },
+  //   children: [
+  //     {
+  //       path: "/company-course-page",
+  //       component: () => import("@/views/companyCourse/index.vue"),
+  //       name: "companyCoursePage",
+  //       meta: {
+  //         title: "所有課程列表",
+  //         icon: "el-icon-Avatar",
+  //         hidden: false,
+  //         roles: ["USER"],
+  //         keepAlive: true,
+  //       },
+  //     }
+  //   ]
+  // },
+
 ]
 
 

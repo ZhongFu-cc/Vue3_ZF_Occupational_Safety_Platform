@@ -23,17 +23,25 @@
         <el-input v-model="formData.phone" placeholder="請輸入聯絡電話" clearable />
       </el-form-item>
 
+      <el-form-item v-if="props.role === 'company'" label="部門" prop="departmentId">
+        <el-select @end-reached="findDepartmentList(false)" v-model="formData.departmentId" filterable remote clearable
+          placeholder="請選擇部門">
+          <el-option v-for="department in departmentList" :key="department.departmentId" :label="department.name"
+            :value="department.departmentId" />
+        </el-select>
+      </el-form-item>
+
       <!-- <el-form-item label="公司名稱" prop="companyName">
         <el-input v-model="formData.companyName" placeholder="請輸入公司名稱" clearable />
       </el-form-item> -->
 
-      <el-form-item label="公司" prop="companyId">
+      <!-- <el-form-item label="公司" prop="companyId">
         <el-select @end-reached="findCompanyList(false)" v-model="formData.companyId" filterable remote clearable
           placeholder="請選擇公司" :remote-method="remoteMethod">
           <el-option v-for="company in companyList" :key="company.companyId" :label="company.name"
             :value="company.companyId" />
         </el-select>
-      </el-form-item>
+      </el-form-item> -->
 
       <el-form-item label="備註" prop="remark">
         <el-input v-model="formData.remark" type="textarea" :rows="3" maxlength="200" show-word-limit
@@ -56,11 +64,16 @@ import { useUserService } from '@/service/UserService';
 import { tryCatch } from '@/utils/tryCatch';
 import { findCompanyListByQueryTextAndPaginationApi } from '@/api/company';
 import { Company } from '@/api/company/type';
+import { useUserStore } from '@/store';
+import { findDepartmentListByQueryTextAndPaginationApi } from '@/api/department';
+import { Department } from '@/api/department/type';
 
 const props = defineProps<{
   role: 'admin' | 'company';
   submitting?: boolean;
 }>();
+
+
 
 const emit = defineEmits<{
   (event: 'submit'): void;
@@ -68,6 +81,7 @@ const emit = defineEmits<{
 }>();
 
 const userService = useUserService(props.role);
+const user = useUserStore().user;
 
 const EMPTY_FORM: AddSysUser = {
   account: '',
@@ -124,8 +138,10 @@ const handleSubmit = async () => {
     realName: formData.realName.trim(),
     email: formData.email.trim(),
     phone: formData.phone.trim(),
-    companyName: formData.companyName.trim(),
+    companyName: user.companyName,
+    companyId: user.companyId,
     remark: formData.remark.trim(),
+    departmentId: formData.departmentId,
   }));
 
   if (error || res.code !== 200) {
@@ -180,13 +196,53 @@ const findCompanyList = async (isRefresh = false) => {
   }
 }
 
+const departmentList = ref<Department[]>([]);
+const departmentCurrentPage = ref(1);
+const departmentHasMore = ref(true);
+const findDepartmentList = async (isRefresh = false) => {
+  if (isRefresh) {
+    departmentCurrentPage.value = 1;
+    departmentList.value = [];
+  }
+
+  if (!departmentHasMore.value && !isRefresh) {
+    console.log('沒有更多部門了')
+    return;
+  }
+
+  const { res, error }: any = await tryCatch(findDepartmentListByQueryTextAndPaginationApi(departmentCurrentPage.value, 10, ''));
+  console.log('findDepartmentListByQueryTextAndPaginationApi res', res, 'error', error);
+  if (error || res.code !== 200) {
+    ElNotification({
+      title: '錯誤',
+      message: '無法獲取部門列表',
+      type: 'error',
+    });
+    return;
+  }
+  departmentList.value = res.data.records;
+  departmentHasMore.value = departmentList.value.length < res.data.total;
+
+  if (departmentHasMore.value) {
+    departmentCurrentPage.value++;
+  }
+}
+
 const remoteMethod = (query: string) => {
   queryText.value = query;
   findCompanyList(true);
 };
 
+watch(() => props.role, () => {
+  if (props.role === 'admin') {
+    findCompanyList(true);
+  } else if (props.role === 'company') {
+    findDepartmentList(true);
+  }
+}, { immediate: true });
+
 onMounted(() => {
-  findCompanyList(true);
+  // findCompanyList(true);
 });
 </script>
 

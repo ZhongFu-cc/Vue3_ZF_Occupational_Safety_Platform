@@ -20,7 +20,8 @@ export function findAllCompanyCourseListApi() {
 export function findCompanyCourseListByQueryTextAndPaginationApi(
   page: number,
   size: number,
-  queryText: string
+  queryText: string,
+  courseCategoryId?: string,
 ): Promise<any> {
   return request({
     url: `${BASE_URL}/pagination`,
@@ -29,6 +30,7 @@ export function findCompanyCourseListByQueryTextAndPaginationApi(
       page,
       size,
       queryText,
+      courseCategoryId,
     },
   })
 }
