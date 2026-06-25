@@ -23,5 +23,5 @@ export interface UpdateDepartment {
 
 export interface AddDepartmentCourse {
   departmentId: string;
-  companyCourseId: string[];
+  companyCourseId: string;
 }

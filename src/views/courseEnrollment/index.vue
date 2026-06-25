@@ -1,9 +1,10 @@
 <template>
   <div>
-    <BasicComponent title="所有課程">
+    <BasicComponent title="已報名課程">
       <template #data-table>
         <div v-if="hasData" class="course-box">
-          <el-card v-for="course in courseEnrollmentList" class="course-card">
+          <el-card v-for="course in courseEnrollmentList" class="course-card"
+            @click="headToCourseLearn(course.courseId)">
             <template #header>
               <div class="image-box">
                 <el-image class="cover-image" :src="`${minioEnv}${course.courseCoverImage}`"></el-image>
@@ -11,7 +12,7 @@
             </template>
             <template #default>
               <div class="course-info">
-                <h2 class="course-title">{{ course.courseName }}</h2>
+                <h2 class="course-title" @click="headToCourseLearn(course.courseId)">{{ course.courseName }}</h2>
                 <div class="course-detail">
                   <p>總章節數: {{ course.totalChapters }}</p>
                 </div>
@@ -25,7 +26,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { findAllCompanyCourseListApi, findCompanyCourseListByQueryTextAndPaginationApi } from "@/api/companyCourseManagement";
 import { findCourseEnrollmentByOwnerAndPaginationApi } from "@/api/courseEnrollment";
 import { CourseEnrollmentVO } from "@/api/courseEnrollment/type";
 import BasicComponent from "@/layout/components/Basic/index.vue";
@@ -37,12 +37,11 @@ const minioEnv = import.meta.env.VITE_MINIO_API_URL;
 const courseEnrollmentList = ref<CourseEnrollmentVO[]>([]);
 const currentPage = ref(1);
 const status = ref<'not_started' | 'in_progress' | 'completed' | 'cancelled' | 'expired' | undefined>();
-const queryText = ref<string>('');
 const hasData = computed(() => courseEnrollmentList.value.length > 0);
 
 
 const getCourseEnrollmentList = async () => {
-  const { res, error }: any = await tryCatch(findCompanyCourseListByQueryTextAndPaginationApi(currentPage.value, 10, queryText.value));
+  const { res, error }: any = await tryCatch(findCourseEnrollmentByOwnerAndPaginationApi(currentPage.value, 10, status.value));
   if (error || res.code !== 200) {
     ElNotification.error({
       title: "錯誤",
@@ -53,6 +52,11 @@ const getCourseEnrollmentList = async () => {
 
   courseEnrollmentList.value = res.data.records;
 
+};
+
+const router = useRouter();
+const headToCourseLearn = (courseId: string) => {
+  router.push(`/course-learn-page/${courseId}`);
 };
 
 onMounted(() => {

@@ -39,7 +39,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { createCompanyCourseApi, findAllCompanyCourseListApi } from '@/api/companyCourse';
+import { createCompanyCourseApi, findAllCompanyCourseListApi } from '@/api/companyCourseManagement';
 import { findCourseCategoryListByQueryTextAndPaginationApi } from '@/api/course/category';
 import { CourseCategory } from '@/api/course/category/type';
 import { findCourseListByCategoryIdAndPaginationApi } from '@/api/course/course';

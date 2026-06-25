@@ -57,7 +57,6 @@ import { createCourseApi } from '@/api/course/course';
 import { tryCatch } from '@/utils/tryCatch';
 import { findCourseCategoryListByQueryTextAndPaginationApi } from '@/api/course/category';
 
-import InfiniteScrollSelect from '@/components/InfiniteScrollingSelect/index.vue';
 
 const props = defineProps<{
   submitting?: boolean;
@@ -254,19 +253,21 @@ onMounted(() => {
 .thumbnail-uploader {
   .avatar {
     width: 100%;
-    display: block;
+    height: 100%;
+    object-fit: cover;
   }
 
   :deep(.el-upload) {
-    border: 1px dashed var(--el-border-color);
-    border-radius: 6px;
-    height: 178px;
+    max-width: 400px;
+    /* 限制最大寬度 */
+    height: 220px;
     aspect-ratio: 16/9;
-
-    cursor: pointer;
-    position: relative;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
-    transition: var(--el-transition-duration-fast);
   }
 
   .el-upload:hover {

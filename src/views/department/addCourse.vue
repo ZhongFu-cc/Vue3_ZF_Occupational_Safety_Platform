@@ -1,9 +1,9 @@
 <template>
   <div>
-    <BasicComponent :title="`課程選擇 - ${jobType?.name}`">
+    <BasicComponent :title="`課程選擇 - ${department?.name}`">
       <template #search-box>
-        <el-input v-model="queryText" placeholder="請輸入課程名稱" @keydown.enter="findJobCourseList" />
-        <el-button type="primary" @click="findJobCourseList">搜尋</el-button>
+        <el-input v-model="queryText" placeholder="請輸入課程名稱" @keydown.enter="findDepartmentCourseList" />
+        <el-button type="primary" @click="findDepartmentCourseList">搜尋</el-button>
       </template>
 
       <template #option-box>
@@ -11,23 +11,18 @@
       </template>
 
       <template #data-table>
-        <el-table v-if="hasData" :data="jobCourseList">
-          <el-table-column width="150">
+        <el-table v-if="hasData" :data="departmentCourseList">
+          <el-table-column>
             <template #default="{ row }">
-              <el-image :src="minioEnv + row.coverImage" fit="cover"></el-image>
+              <el-image :src="minioEnv + row.courseCoverImage" fit="cover"></el-image>
             </template>
           </el-table-column>
-          <el-table-column prop="title" label="課程名稱"></el-table-column>
-          <el-table-column prop="description" label="課程描述"></el-table-column>
-          <el-table-column label="是否必要課程">
-            <template #default="{ row }">
-              <el-switch v-model="row.isMandatory" :active-value="1" :inactive-value="0" active-text="是"
-                inactive-text="否" @click="handleUpdate(row)"></el-switch>
-            </template>
-          </el-table-column>
+          <el-table-column prop="courseName" label="課程名稱"></el-table-column>
+          <el-table-column prop="courseDescription" label="課程描述"></el-table-column>
+          <el-table-column prop="courseTotalMinutes" label="課程時長" align="center"></el-table-column>
           <el-table-column label="操作">
             <template #default="{ row }">
-              <el-button type="danger" link @click="deleteCourse(row.jobCourseId)">刪除</el-button>
+              <el-button type="danger" link @click="deleteCourseFromDepartment(row.departmentCourseId)">刪除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -35,8 +30,8 @@
         <el-empty v-else description="暫無課程"></el-empty>
 
         <div class="pagination-box">
-          <el-pagination layout="prev, pager, next" :total="Number(jobCourseTotal)"
-            @current-change="handleJobCoursePageChange" />
+          <el-pagination layout="prev, pager, next" :total="Number(departmentCourseTotal)"
+            @current-change="handleDepartmentCoursePageChange" />
         </div>
       </template>
     </BasicComponent>
@@ -57,8 +52,8 @@
         <el-table-column prop="description" label="課程描述"></el-table-column>
         <el-table-column label="操作" width="100">
           <template #default="{ row }">
-            <el-button type="primary" @click="openAddDialogState.open(row.courseId)"
-              :disabled="existingCourseIds.includes(row.courseId)">新增</el-button>
+            <el-button type="primary" @click="openAddDialogState.open(row.companyCourseId)"
+              :disabled="existingCourseIds.includes(row.companyCourseId)">新增</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -69,61 +64,58 @@
     </el-dialog>
 
     <el-dialog v-model="openAddDialogState.isOpen" title="確認新增課程" width="30%">
-      <span>確定要將此課程新增到作業類別嗎？</span>
-      <el-form-item label="是否為必要課程">
-        <el-switch v-model="isMandatory" :active-value="1" :inactive-value="0" active-text="是"
-          inactive-text="否"></el-switch>
-      </el-form-item>
-      <el-button type="primary" @click="addCourseToJobType">確認新增</el-button>
+      <span>確定要將此課程新增到部門嗎？</span>
+      <el-button type="primary" @click="addCourseToDepartment">確認新增</el-button>
       <el-button @click="openAddDialogState.close">取消</el-button>
     </el-dialog>
   </div>
 </template>
 <script lang="ts" setup>
+import { findCompanyCourseListByQueryTextAndPaginationApi } from '@/api/companyCourseManagement';
 import { findCourseCategoryListByQueryTextAndPaginationApi } from '@/api/course/category';
 import { CourseCategory } from '@/api/course/category/type';
-import { findCourseListByCategoryIdAndPaginationApi } from '@/api/course/course';
 import { Course } from '@/api/course/course/type';
-import { findJobTypeByIdApi } from '@/api/jobType';
-import { JobType } from '@/api/jobType/type';
-import { createTypeCategoryApi, deleteTypeCategoryByIdApi, findAllJobCourseListApi, findJobTypeCourseCategoryByJobTypeIdApi, updateTypeCategoryApi } from '@/api/jobTypeCourse';
-import { AddTypeCategory, JobCourseVO, UpdateTypeCategory } from '@/api/jobTypeCourse/type';
+import { findDepartmentByIdApi } from '@/api/department';
+import { AddDepartmentCourse, Department } from '@/api/department/type';
+import { addDepartmentCourseApi, deleteDepartmentCourseByIdApi, findAllDepartmentCourseListApi, findDepartmentCourseListByPaginationApi } from '@/api/departmentCourse';
+import { DepartmentCourseVo } from '@/api/departmentCourse/type';
 import BasicComponent from '@/layout/components/Basic/index.vue'
 import { useAppStore } from '@/store';
 import { tryCatch } from '@/utils/tryCatch';
 import { ElNotification } from 'element-plus';
 
-const jobTypeId = ref<string>(useRoute().params.jobTypeId as string)
+const departmentId = ref<string>(useRoute().params.departmentId as string)
 
 const hasData = ref<boolean>(false);
 const device = useAppStore().device
 
-const jobCourseList = ref<JobCourseVO[]>([])
+const departmentCourseList = ref<DepartmentCourseVo[]>([])
 const currentPage = ref<number>(1)
 const queryText = ref<string>('')
 const existingCourseIds = ref<string[]>([])
 
-const jobType = ref<JobType>()
-const findJobType = async () => {
-  const { res, error }: any = await tryCatch(findJobTypeByIdApi(jobTypeId.value))
-  console.log('findJobType res', res, 'error', error);
+// 顯示部門資訊
+const department = ref<Department>()
+const findDepartment = async () => {
+  const { res, error }: any = await tryCatch(findDepartmentByIdApi(departmentId.value))
+  console.log('findDepartment res', res, 'error', error);
   if (error || res.code !== 200) {
     ElNotification({
       title: '錯誤',
-      message: '獲取作業類別失敗',
+      message: '獲取部門失敗',
       type: 'error',
     })
 
     return
   }
-  jobType.value = res.data
+  department.value = res.data
 }
 
 
-const jobCourseTotal = ref<number>(0)
-const findJobCourseList = async () => {
-  const { res, error }: any = await tryCatch(findJobTypeCourseCategoryByJobTypeIdApi(jobTypeId.value, currentPage.value, 10, queryText.value))
-  console.log('findJobCourseList res', res, 'error', error);
+const departmentCourseTotal = ref<number>(0)
+const findDepartmentCourseList = async () => {
+  const { res, error }: any = await tryCatch(findDepartmentCourseListByPaginationApi(currentPage.value, 10, departmentId.value, queryText.value))
+  console.log('findDepartmentCourseList res', res, 'error', error);
   if (error || res.code !== 200) {
     ElNotification({
       title: '錯誤',
@@ -133,14 +125,14 @@ const findJobCourseList = async () => {
 
     return
   }
-  jobCourseList.value = res.data.records
-  jobCourseTotal.value = res.data.total
-  hasData.value = jobCourseList.value.length > 0
-  findAllJobCourseList()
+  departmentCourseList.value = res.data.records
+  departmentCourseTotal.value = res.data.total
+  hasData.value = departmentCourseList.value.length > 0
+  findAllDepartmentCourseList()
 }
 
-const findAllJobCourseList = async () => {
-  const { res, error }: any = await tryCatch(findAllJobCourseListApi(jobTypeId.value))
+const findAllDepartmentCourseList = async () => {
+  const { res, error }: any = await tryCatch(findAllDepartmentCourseListApi(departmentId.value, queryText.value))
   if (error || res.code !== 200) {
     ElNotification({
       title: '錯誤',
@@ -150,13 +142,13 @@ const findAllJobCourseList = async () => {
 
     return
   }
-  existingCourseIds.value = res.data.map((item: JobCourseVO) => item.courseId)
+  existingCourseIds.value = res.data.map((item: DepartmentCourseVo) => item.companyCourseId)
   console.log('existingCourseIds', existingCourseIds.value);
 }
 
-const handleJobCoursePageChange = (page: number) => {
+const handleDepartmentCoursePageChange = (page: number) => {
   currentPage.value = page
-  findJobCourseList()
+  findDepartmentCourseList()
 }
 
 // ------------------------------------------------------------
@@ -182,7 +174,7 @@ const handlePageChange = (page: number) => {
 }
 const findCourseList = async () => {
   courseList.value = []
-  const { res, error }: any = await tryCatch(findCourseListByCategoryIdAndPaginationApi(coursePage.value, 10, selectCategoryId.value, courseQueryText.value));
+  const { res, error }: any = await tryCatch(findCompanyCourseListByQueryTextAndPaginationApi(coursePage.value, 10, courseQueryText.value, selectCategoryId.value));
   if (error || res.code !== 200) {
     ElNotification({
       title: '錯誤',
@@ -198,12 +190,11 @@ const findCourseList = async () => {
 }
 // ------------------------------------------------------------
 
-const addCourseId = ref<string>('')
-const isMandatory = ref<number>(0)
+const addCompanyCourseId = ref<string>('')
 const openAddDialogState = reactive({
   isOpen: false,
-  open: (courseId: string) => {
-    addCourseId.value = courseId
+  open: (companyCourseId: string) => {
+    addCompanyCourseId.value = companyCourseId
     openAddDialogState.isOpen = true
   },
   close: () => {
@@ -211,14 +202,13 @@ const openAddDialogState = reactive({
   }
 })
 
-const addCourseToJobType = async () => {
-  const payload: AddTypeCategory = {
-    jobTypeId: jobTypeId.value,
-    courseId: addCourseId.value,
-    isMandatory: isMandatory.value
+const addCourseToDepartment = async () => {
+  const payload: AddDepartmentCourse = {
+    companyCourseId: addCompanyCourseId.value,
+    departmentId: departmentId.value,
   }
 
-  const { res, error }: any = await tryCatch(createTypeCategoryApi(payload))
+  const { res, error }: any = await tryCatch(addDepartmentCourseApi(payload))
   if (error || res.code !== 200) {
     ElNotification({
       title: '錯誤',
@@ -234,34 +224,9 @@ const addCourseToJobType = async () => {
     type: 'success',
   })
 
-  await findJobCourseList()
+  await findDepartmentCourseList()
   openAddDialogState.close()
   dialogState.close()
-}
-// ------------------------------------------------------------
-const handleUpdate = async (row: any) => {
-  const payload: UpdateTypeCategory = {
-    jobCourseId: row.jobCourseId,
-    isMandatory: row.isMandatory
-  }
-
-  const { res, error }: any = await tryCatch(updateTypeCategoryApi(payload))
-  if (error || res.code !== 200) {
-    ElNotification({
-      title: '錯誤',
-      message: '更新課程失敗',
-      type: 'error',
-    })
-    return;
-  }
-
-  ElNotification({
-    title: '成功',
-    message: '更新課程成功',
-    type: 'success',
-  })
-
-  await findJobCourseList()
 }
 
 // ------------------------------------------------------------
@@ -303,14 +268,14 @@ const fetchCourseCategoryList = async (isRefresh = false) => {
   }
 };
 
-const deleteCourse = async (jobCourseId: string) => {
+const deleteCourseFromDepartment = async (departmentCourseId: string) => {
   ElMessageBox.confirm('確定要刪除這個課程嗎？', '警告', {
     confirmButtonText: '確定',
     cancelButtonText: '取消',
     type: 'warning',
   }).then(async () => {
     // 在這裡調用刪除 API
-    const { res, error }: any = await tryCatch(deleteTypeCategoryByIdApi(jobCourseId));
+    const { res, error }: any = await tryCatch(deleteDepartmentCourseByIdApi(departmentCourseId));
     if (error || res.code !== 200) {
       ElNotification({
         title: '錯誤',
@@ -327,7 +292,7 @@ const deleteCourse = async (jobCourseId: string) => {
     });
 
     // 刪除成功後重新獲取列表
-    await findJobCourseList();
+    await findDepartmentCourseList();
   }).catch(() => {
     // 使用者取消刪除
   });
@@ -335,10 +300,10 @@ const deleteCourse = async (jobCourseId: string) => {
 }
 
 onMounted(() => {
-  findJobCourseList()
   fetchCourseCategoryList()
-  findAllJobCourseList()
-  findJobType()
+  findDepartmentCourseList()
+  findAllDepartmentCourseList()
+  findDepartment()
 })
 </script>
 <style lang="scss" scoped>
@@ -350,7 +315,7 @@ onMounted(() => {
 
 .el-image {
   border-radius: 8px;
-  width: 100px;
-  height: 80px;
+  width: 10rem;
+  aspect-ratio: 16/9;
 }
 </style>

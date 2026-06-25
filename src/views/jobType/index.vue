@@ -108,7 +108,7 @@ const updateJobType = reactive<UpdateJobType>({} as UpdateJobType);
 const updateDialogState = reactive({
   isOpen: false,
   submitting: false,
-  open: (jobType: UpdateJobType) => {
+  open: (jobType: any) => {
     Object.assign(updateJobType, jobType);
     updateDialogState.isOpen = true;
   },

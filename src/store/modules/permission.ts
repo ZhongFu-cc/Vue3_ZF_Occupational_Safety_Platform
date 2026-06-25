@@ -1,5 +1,5 @@
 import { RouteRecordRaw } from "vue-router";
-import { constantRoutes, adminDynamicRoutes, companyManagerDynamicRoutes } from "@/router";
+import { constantRoutes, adminDynamicRoutes, companyManagerDynamicRoutes, userDynamicRoutes } from "@/router";
 import { store } from "@/store";
 import { listRoutes } from "@/api/menu";
 
@@ -104,6 +104,8 @@ export const usePermissionStore = defineStore("permission", () => {
     } else if (roles.includes('company_manager')) {
       //公司管理员,擁有部分權限,直接使用後臺接口獲取的動態路由
       Object.assign(dynamicRoutes, companyManagerDynamicRoutes);
+    } else {
+      Object.assign(dynamicRoutes, userDynamicRoutes);
     }
     //不啟用動態路由時,直接將空數組作為代替,讓他去與設定好的靜態路由去做拼接
     setRoutes(dynamicRoutes);

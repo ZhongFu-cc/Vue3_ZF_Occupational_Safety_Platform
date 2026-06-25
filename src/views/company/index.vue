@@ -15,7 +15,7 @@
           <el-table-column prop="name" label="企業名稱"></el-table-column>
           <el-table-column width="200">
             <template #default="{ row }">
-              <el-select v-model="row.status" placeholder="請選擇企業狀態" @change="updateStatus(row)">
+              <el-select v-model="row.status" placeholder="請選擇企業狀態" @change="updateStatus(row as Company)">
                 <el-option label="啟用" value="enabled"></el-option>
                 <el-option label="停用" value="disabled"></el-option>
                 <el-option label="過期" value="expired"></el-option>
@@ -24,8 +24,8 @@
           </el-table-column>
           <el-table-column width="150" label="操作">
             <template #default="{ row }">
-              <el-button link type="primary" @click="updateDialogState.open(row)">編輯</el-button>
-              <el-button link type="danger">刪除</el-button>
+              <el-button link type="primary" @click="updateDialogState.open(row as Company)">編輯</el-button>
+              <!-- <el-button link type="danger" @click="deleteCompany(row.companyId)">刪除</el-button> -->
             </template>
           </el-table-column>
         </el-table>
@@ -114,6 +114,7 @@ const updateDialogState = reactive({
     updateDialogState.isOpen = false;
   },
 })
+
 
 onMounted(() => {
   findCompanyList();

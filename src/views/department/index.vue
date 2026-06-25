@@ -10,7 +10,10 @@
       </template>
 
       <template #option-box>
-        <el-button type="primary" @click="createDialogState.open">新增部門</el-button>
+        <div>
+          <el-button type="primary" @click="createDialogState.open">新增部門</el-button>
+          <el-button type="success" @click="oneClickDialogState.open">一鍵分發</el-button>
+        </div>
       </template>
 
       <template #data-table>
@@ -27,7 +30,7 @@
             <template #default="{ row }">
               <el-button type="primary" link @click="updateDialogState.open(row)">更新</el-button>
               <el-button type="danger" link @click="deleteDepartment(row.departmentId)">刪除</el-button>
-              <el-button type="warning" link @click="addCourseDialogState.open(row)">課程</el-button>
+              <el-button type="warning" link @click="headToCourseManagement(row.departmentId)">課程</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -49,10 +52,19 @@
         @cancel="updateDialogState.close" />
     </el-dialog>
 
-    <el-dialog v-model="addCourseDialogState.isOpen" title="部門課程管理" :width="device === 'mobile' ? '100%' : '70%'"
+    <el-dialog v-model="oneClickDialogState.isOpen" title="一鍵分發" :width="device === 'mobile' ? '90%' : '30%'"
       destroy-on-close>
-      <AddCourse :departmentId="selectDepartmentId" @update="fetchDepartmentList" @close="addCourseDialogState.close" />
+      <div>
+        <p>此功能會為 未報名課程 的 企業員工 以及 上完課但證書過期的 企業員工 報名所屬部門的課程</p>
+        <el-button type="primary" @click="oneClickEnrollment">確定</el-button>
+        <el-button @click="oneClickDialogState.close">取消</el-button>
+      </div>
     </el-dialog>
+
+    <!-- <el-dialog v-model="addCourseDialogState.isOpen" title="部門課程管理" :width="device === 'mobile' ? '100%' : '70%'"
+      destroy-on-close> -->
+    <!-- <AddCourse :departmentId="selectDepartmentId" @update="fetchDepartmentList" @close="addCourseDialogState.close" /> -->
+    <!-- </el-dialog> -->
   </div>
 </template>
 
@@ -64,7 +76,8 @@ import CreateDepartmentForm from './components/CreateDepartment.vue';
 import UpdateDepartmentForm from './components/UpdateDepartment.vue';
 import { useAppStore } from '@/store';
 import { Department } from '@/api/department/type';
-import { deleteDepartmentByIdApi, findDepartmentListByQueryTextAndPaginationApi, updateDepartmentApi } from '@/api/department';
+import { deleteDepartmentByIdApi, findDepartmentListByQueryTextAndPaginationApi, oneClickEnrollmentApi, updateDepartmentApi } from '@/api/department';
+import { use } from 'echarts';
 
 
 const currentPage = ref(1);
@@ -126,7 +139,7 @@ const createDialogState = reactive({
 const updateDepartmentData = reactive({} as Department);
 const updateDialogState = reactive({
   isOpen: false,
-  open: (row: Department) => {
+  open: (row: any) => {
     updateDialogState.isOpen = true;
     Object.assign(updateDepartmentData, row);
   },
@@ -136,7 +149,7 @@ const updateDialogState = reactive({
 const selectDepartmentId = ref<string>('')
 const addCourseDialogState = reactive({
   isOpen: false,
-  open: (row: Department) => {
+  open: (row: any) => {
     addCourseDialogState.isOpen = true;
     selectDepartmentId.value = row.departmentId
   },
@@ -197,6 +210,40 @@ const handleUpdateStatus = async (department: Department) => {
 
   fetchDepartmentList();
 };
+
+const router = useRouter();
+const headToCourseManagement = (departmentId: string) => {
+  // 跳轉到部門課程管理頁面，並傳遞 departmentId
+  // 這裡可以使用 Vue Router 的 push 方法來實現跳轉
+  router.push(`/department-course-page/${departmentId}`);
+};
+
+const oneClickDialogState = reactive({
+  isOpen: false,
+  open: () => oneClickDialogState.isOpen = true,
+  close: () => oneClickDialogState.isOpen = false,
+})
+
+const oneClickEnrollment = async () => {
+  const { res, error }: any = await tryCatch(oneClickEnrollmentApi());
+
+  if (error || res?.code !== 200) {
+    ElNotification({
+      title: '錯誤',
+      message: '一鍵分發失敗',
+      type: 'error',
+    });
+    return;
+  }
+
+  ElNotification({
+    title: '成功',
+    message: '一鍵分發成功',
+    type: 'success',
+  });
+  fetchDepartmentList();
+  oneClickDialogState.close();
+}
 
 onMounted(() => {
   fetchDepartmentList();

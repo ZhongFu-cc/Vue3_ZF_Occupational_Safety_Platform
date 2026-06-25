@@ -55,6 +55,8 @@ const props = defineProps<{
 
 const emit = defineEmits(['submit', 'cancel']);
 
+console.log(props.course?.coverImage)
+
 const EMPTY_COURSE_CATEGORY: UpdateCourse = {
   courseId: '',
   courseCategoryId: '',
@@ -85,14 +87,7 @@ const syncFormData = (course: UpdateCourse) => {
   formData.isActive = course?.isActive ?? 1;
 };
 
-watch(
-  () => props.course,
-  (value) => {
-    syncFormData(value || ({} as UpdateCourse));
-    updateFormRef.value?.clearValidate();
-  },
-  { immediate: true, deep: true }
-);
+
 
 const handleCancel = () => {
   emit('cancel');
@@ -107,6 +102,21 @@ const handleImageUpload: UploadProps['onSuccess'] = (response, uploadFile) => {
   imgFile = uploadFile.raw!;
 }
 
+watch(
+  () => props.course,
+  (value) => {
+    syncFormData(value || ({} as UpdateCourse));
+    updateFormRef.value?.clearValidate();
+
+    if (props.course?.coverImage) {
+      imageUrl.value = minioAPI + props.course.coverImage;
+    } else {
+      imageUrl.value = undefined;
+    }
+  },
+  { immediate: true, deep: true }
+);
+
 const handleSubmit = async () => {
   if (!updateFormRef.value) {
     return;
@@ -119,6 +129,11 @@ const handleSubmit = async () => {
 
   const payload = new FormData();
   payload.append('data', JSON.stringify(formData));
+  if (imgFile) {
+    payload.append('imgFile', imgFile);
+  }
+
+  console.log(payload.get('imgFile'))
 
   const { res, error }: any = await tryCatch(updateCourseApi(payload));
   if (error || res.code !== 200) {
@@ -189,19 +204,21 @@ const handleSubmit = async () => {
 .thumbnail-uploader {
   .avatar {
     width: 100%;
-    display: block;
+    height: 100%;
+    object-fit: cover;
   }
 
   :deep(.el-upload) {
-    border: 1px dashed var(--el-border-color);
-    border-radius: 6px;
-    height: 178px;
+    max-width: 400px;
+    /* 限制最大寬度 */
+    height: 220px;
     aspect-ratio: 16/9;
-
-    cursor: pointer;
-    position: relative;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
-    transition: var(--el-transition-duration-fast);
   }
 
   .el-upload:hover {
