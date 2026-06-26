@@ -3,8 +3,7 @@
     <BasicComponent title="已報名課程">
       <template #data-table>
         <div v-if="hasData" class="course-box">
-          <el-card v-for="course in courseEnrollmentList" class="course-card"
-            @click="headToCourseLearn(course.courseId)">
+          <el-card v-for="course in courseEnrollmentList" class="course-card" @click="headToCourseLearn(course)">
             <template #header>
               <div class="image-box">
                 <el-image class="cover-image" :src="`${minioEnv}${course.courseCoverImage}`"></el-image>
@@ -12,7 +11,7 @@
             </template>
             <template #default>
               <div class="course-info">
-                <h2 class="course-title" @click="headToCourseLearn(course.courseId)">{{ course.courseName }}</h2>
+                <h2 class="course-title">{{ course.courseName }}</h2>
                 <div class="course-detail">
                   <p>總章節數: {{ course.totalChapters }}</p>
                 </div>
@@ -55,8 +54,14 @@ const getCourseEnrollmentList = async () => {
 };
 
 const router = useRouter();
-const headToCourseLearn = (courseId: string) => {
-  router.push(`/course-learn-page/${courseId}`);
+const headToCourseLearn = (course: any) => {
+  router.push({
+    path: "/course-learn-page",
+    query: {
+      courseId: course.courseId,
+      courseEnrollmentId: course.courseEnrollmentId,
+    },
+  })
 };
 
 onMounted(() => {

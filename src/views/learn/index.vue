@@ -8,7 +8,8 @@
         </el-menu>
 
         <div class="content">
-          <ChapterItem v-if="clickedChapter" :chapter="clickedChapter" />
+          <ChapterItem v-if="clickedChapter" :key="clickedChapter.courseChapterId" :chapter="clickedChapter"
+            :courseEnrollmentId="courseEnrollmentId" />
         </div>
       </div>
     </template>
@@ -26,7 +27,9 @@ import MenuItem from "./components/MenuItem.vue";
 import ChapterItem from "./components/ChapterItem.vue";
 
 const route = useRoute();
-const courseId = ref<string>(route.params.courseId as string);
+const courseId = ref<string>(route.query.courseId as string);
+const courseEnrollmentId = ref<string>(route.query.courseEnrollmentId as string);
+
 const course = reactive<Course>({} as Course);
 const findCorseById = async () => {
   const { res, error }: any = await tryCatch(findCourseByIdApi(courseId.value));
