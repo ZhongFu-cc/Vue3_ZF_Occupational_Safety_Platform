@@ -442,7 +442,7 @@ export const userDynamicRoutes: RouteRecordRaw[] = [
     },
     children: [
       {
-        path: "/course-learn-page/:courseId",
+        path: "/course-learn-page",
         component: () => import("@/views/learn/index.vue"),
         name: "courseLearnPage",
         meta: {
