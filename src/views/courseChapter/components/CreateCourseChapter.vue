@@ -21,6 +21,10 @@
         </el-select>
       </el-form-item>
 
+      <el-form-item label="章節排序值(數字越小越靠前)" prop="chapterOrder">
+        <el-input-number v-model="formData.chapterOrder" :min="0" :step="1" controls-position="right" />
+      </el-form-item>
+
       <div class="action-row">
         <el-button @click="handleCancel">取消</el-button>
         <el-button type="primary" @click="handleSubmit">建立課程分類</el-button>
@@ -35,7 +39,6 @@ import { reactive, ref } from 'vue';
 import { createCourseChapterApi } from '@/api/course/chapter';
 import type { AddCourseChapter, CourseChapterVO } from '@/api/course/chapter/type';
 import { tryCatch } from '@/utils/tryCatch';
-import { findCourseCategoryListByQueryTextAndPaginationApi } from '@/api/course/category';
 
 const props = defineProps<{
   courseId: string;

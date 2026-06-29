@@ -4,12 +4,13 @@
       <div class="main-box">
         <el-menu class="menu" background-color="#545c64" text-color="#fff" active-text-color="#ffd04b">
           <MenuItem v-for="(chapter, index) in courseChapterList" :key="chapter.courseChapterId" :item="chapter"
-            :current-index="String(index)" />
+            :current-index="String(index)" v-loading.fullscreen.lock="loading"
+            element-loading-background="rgba(122, 122, 122, 0.8)" element-loading-text="載入中..." />
         </el-menu>
 
         <div class="content">
           <ChapterItem v-if="clickedChapter" :key="clickedChapter.courseChapterId" :chapter="clickedChapter"
-            :courseEnrollmentId="courseEnrollmentId" />
+            :courseEnrollmentId="courseEnrollmentId" @loading-completed="endLoading" />
         </div>
       </div>
     </template>
@@ -29,6 +30,11 @@ import ChapterItem from "./components/ChapterItem.vue";
 const route = useRoute();
 const courseId = ref<string>(route.query.courseId as string);
 const courseEnrollmentId = ref<string>(route.query.courseEnrollmentId as string);
+
+const loading = ref<boolean>(false);
+const endLoading = () => {
+  loading.value = false;
+};
 
 const course = reactive<Course>({} as Course);
 const findCorseById = async () => {
@@ -54,12 +60,17 @@ const findCourseChapterListByCourseId = async () => {
     return;
   }
   courseChapterList.value = res.data;
-  console.log("courseChapterList.value", courseChapterList.value);
+
 };
 
+
+
+const router = useRouter();
 const clickedChapter = ref<CourseChapterVO | null>(null);
 const handleItemClick = (item: any) => {
+  loading.value = true;
   clickedChapter.value = item;
+
 };
 
 // 2. 把這個函式「廣播」給所有子孫組件，鑰匙叫做 'onChapterClick'

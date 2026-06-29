@@ -60,7 +60,7 @@
     "sockjs-client": "1.6.1",
     "sortablejs": "^1.15.2",
     "stompjs": "^2.3.3",
-    "video.js": "^8.23.8",
+    "video.js": "^8.23.9",
     "vue": "^3.4.21",
     "vue-email-editor": "^2.1.4",
     "vue-i18n": "9.9.1",

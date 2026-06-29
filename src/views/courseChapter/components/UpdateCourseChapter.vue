@@ -14,9 +14,6 @@
         </el-tree-select>
       </el-form-item>
 
-      <el-form-item label="章節順序" prop="chapterOrder">
-        <el-input-number v-model="formData.chapterOrder" :min="0" :step="1" controls-position="right" />
-      </el-form-item>
       <el-form-item label="章節類別" prop="contentType">
         <el-select v-model="formData.contentType" placeholder="請選擇章節類別">
           <el-option label="章節" value="directory"></el-option>
@@ -25,6 +22,9 @@
         </el-select>
       </el-form-item>
 
+      <el-form-item label="章節順序(數字越小越靠前)" prop="chapterOrder">
+        <el-input-number v-model="formData.chapterOrder" :min="0" :step="1" controls-position="right" />
+      </el-form-item>
 
       <div class="action-row">
         <el-button @click="handleCancel">取消</el-button>
