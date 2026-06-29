@@ -26,7 +26,7 @@
               <el-button type="primary" link @click="updateDialogState.open(row)"><el-icon>
                   <Edit />
                 </el-icon><span>編輯</span></el-button>
-              <el-button type="danger" link><el-icon>
+              <el-button type="danger" link @click="deleteChapterById(row.courseChapterId)"><el-icon>
                   <Delete />
                 </el-icon><span>刪除</span></el-button>
               <el-button v-if="row.contentType === 'video'" type="success" link
@@ -57,7 +57,7 @@
   </div>
 </template>
 <script setup lang='ts'>
-import { findCourseChapterListByCourseIdApi } from '@/api/course/chapter';
+import { deleteCourseChapterApi, findCourseChapterListByCourseIdApi } from '@/api/course/chapter';
 import BasicComponent from '@/layout/components/Basic/index.vue';
 import CreateForm from './components/CreateCourseChapter.vue';
 import UpdateForm from './components/UpdateCourseChapter.vue';
@@ -148,6 +148,32 @@ const videoUploadDialogState = reactive({
     videoUploadDialogState.isOpen = false
   },
 })
+
+const deleteChapterById = async (courseChapterId: string) => {
+  ElMessageBox.confirm('確定要刪除這個章節嗎？', '警告', {
+    confirmButtonText: '確定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  }).then(async () => {
+    const { res, error }: any = await tryCatch(deleteCourseChapterApi(courseChapterId))
+    if (error || res.code !== 200) {
+      ElNotification({
+        title: '錯誤',
+        message: '刪除章節失敗',
+        type: 'error',
+      })
+      return
+    }
+    ElNotification({
+      title: '成功',
+      message: '刪除章節成功',
+      type: 'success',
+    })
+    getCourseChapterList()
+  }).catch(() => {
+    // 使用者取消了操作
+  })
+};
 
 onMounted(() => {
   getCourseChapterList()

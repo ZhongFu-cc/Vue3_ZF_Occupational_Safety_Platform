@@ -1,5 +1,6 @@
 import request from "@/utils/request";
 import fileRequest from "@/utils/largeFileRequest";
+import { method } from "lodash";
 
 export async function hashFile(file: File) {
   const chuckSize = 10 * 1024 * 1024; // 10 MB
@@ -127,7 +128,8 @@ export async function fileUpload(
   chunks: Blob[],
   percentage: Ref<number>,
   endpoint: string,
-  courseChapterId: string
+  method: string,
+  payload: any
 ) {
   if (!checkResult.data.exist) {
 
@@ -142,13 +144,13 @@ export async function fileUpload(
         totalChunks: chunks.length,
       };
 
-      console.log(courseChapterId)
 
       const formData = new FormData();
-      const payload = {
-        courseChapterId,
-        chunkUploadDTO: data,
-      }
+      payload.chunkUploadDTO = data;
+      // const payload = {
+      //   courseChapterId,
+      //   chunkUploadDTO: data,
+      // }
 
 
 
@@ -156,7 +158,7 @@ export async function fileUpload(
       formData.append("data", JSON.stringify(payload));
       if (data == null) {
       }
-      await slideUploadApi(formData, endpoint);
+      await slideUploadApi(formData, endpoint, method);
     };
 
     // 將 chunks 陣列中的每個 chunk 轉換為 Promise
@@ -168,15 +170,15 @@ export async function fileUpload(
   } else {
     percentage.value = 100;
     let baseUrl = import.meta.env.VITE_MINIO_API_URL;
-    let url = `${baseUrl}/topbs2026/${checkResult.data.path}`;
-    window.open(url, "_blank");
+    let url = `${baseUrl}/zf-platform2026/${checkResult.data.path}`;
+    return url;
   }
 }
 
-function slideUploadApi(data: any, endpoint: string) {
+function slideUploadApi(data: any, endpoint: string, method: string) {
   return fileRequest({
     url: endpoint,
-    method: "post",
+    method: method,
     data,
   });
 }

@@ -24,6 +24,14 @@
         <el-input v-model="formData.companyName" placeholder="請輸入公司名稱" clearable />
       </el-form-item>
 
+      <el-form-item v-if="props.role === 'company'" label="部門" prop="departmentId">
+        <el-select @end-reached="findDepartmentList(false)" v-model="formData.departmentId" filterable remote clearable
+          placeholder="請選擇部門">
+          <el-option v-for="department in departmentList" :key="department.departmentId" :label="department.name"
+            :value="department.departmentId" />
+        </el-select>
+      </el-form-item>
+
       <el-form-item label="密碼" prop="password">
         <el-input v-model="formData.password" type="password" show-password placeholder="請輸入密碼" clearable
           autocomplete="new-password" />
@@ -47,6 +55,8 @@ import { computed, reactive, ref, watch } from 'vue';
 import type { PutSysUser, SysUser } from '@/api/system/type';
 import { useUserService } from '@/service/UserService';
 import { tryCatch } from '@/utils/tryCatch';
+import { findDepartmentListByQueryTextAndPaginationApi } from '@/api/department';
+import { Department } from '@/api/department/type';
 
 
 const props = defineProps<{
@@ -97,6 +107,7 @@ const syncFormData = (user: SysUser) => {
   formData.phone = user?.phone ?? '';
   formData.companyName = user?.companyName ?? '';
   formData.remark = user?.remark ?? '';
+  formData.departmentId = user?.departmentId ?? '';
 };
 
 watch(
@@ -107,6 +118,38 @@ watch(
   },
   { immediate: true, deep: true }
 );
+
+const departmentList = ref<Department[]>([]);
+const departmentCurrentPage = ref(1);
+const departmentHasMore = ref(true);
+const findDepartmentList = async (isRefresh = false) => {
+  if (isRefresh) {
+    departmentCurrentPage.value = 1;
+    departmentList.value = [];
+  }
+
+  if (!departmentHasMore.value && !isRefresh) {
+    console.log('沒有更多部門了')
+    return;
+  }
+
+  const { res, error }: any = await tryCatch(findDepartmentListByQueryTextAndPaginationApi(departmentCurrentPage.value, 10, ''));
+  console.log('findDepartmentListByQueryTextAndPaginationApi res', res, 'error', error);
+  if (error || res.code !== 200) {
+    ElNotification({
+      title: '錯誤',
+      message: '無法獲取部門列表',
+      type: 'error',
+    });
+    return;
+  }
+  departmentList.value = res.data.records;
+  departmentHasMore.value = departmentList.value.length < res.data.total;
+
+  if (departmentHasMore.value) {
+    departmentCurrentPage.value++;
+  }
+}
 
 const handleCancel = () => {
   emit('cancel');
@@ -140,6 +183,12 @@ const handleSubmit = async () => {
   });
   emit('submit');
 };
+
+onMounted(() => {
+  if (props.role === 'company') {
+    findDepartmentList(true);
+  }
+});
 </script>
 <style lang='scss' scoped>
 .update-panel {
