@@ -10,14 +10,13 @@
 
         <div class="content">
           <ChapterItem v-if="clickedChapter" :key="clickedChapter.courseChapterId" :chapter="clickedChapter"
-            :courseEnrollmentId="courseEnrollmentId" @loading-completed="endLoading" />
+            :courseEnrollmentId="courseEnrollmentId" @loading-completed="endLoading" @loading-failed="loadingFail" />
         </div>
       </div>
     </template>
   </BasicComponent>
 </template>
 <script lang="ts" setup>
-import { findCourseChapterListByCourseIdApi } from "@/api/course/chapter";
 import { CourseChapterVO } from "@/api/course/chapter/type";
 import { findCourseByIdApi } from "@/api/course/course";
 import { Course } from "@/api/course/course/type";
@@ -26,6 +25,7 @@ import { tryCatch } from "@/utils/tryCatch";
 import { ElNotification } from "element-plus";
 import MenuItem from "./components/MenuItem.vue";
 import ChapterItem from "./components/ChapterItem.vue";
+import { getChapterByEnrollmentIdApi } from "@/api/chapterProgress/index.js";
 
 const route = useRoute();
 const courseId = ref<string>(route.query.courseId as string);
@@ -34,6 +34,15 @@ const courseEnrollmentId = ref<string>(route.query.courseEnrollmentId as string)
 const loading = ref<boolean>(false);
 const endLoading = () => {
   loading.value = false;
+};
+
+const loadingFail = () => {
+  loading.value = false;
+  ElNotification.error({
+    title: "錯誤",
+    message: "獲取章節資訊失敗",
+  });
+  clickedChapter.value = null;
 };
 
 const course = reactive<Course>({} as Course);
@@ -51,7 +60,7 @@ const findCorseById = async () => {
 
 const courseChapterList = ref<CourseChapterVO[]>([]);
 const findCourseChapterListByCourseId = async () => {
-  const { res, error }: any = await tryCatch(findCourseChapterListByCourseIdApi(courseId.value));
+  const { res, error }: any = await tryCatch(getChapterByEnrollmentIdApi(courseEnrollmentId.value));
   if (error || res.code !== 200) {
     ElNotification.error({
       title: "錯誤",
@@ -60,17 +69,17 @@ const findCourseChapterListByCourseId = async () => {
     return;
   }
   courseChapterList.value = res.data;
-
 };
 
 
 
-const router = useRouter();
 const clickedChapter = ref<CourseChapterVO | null>(null);
 const handleItemClick = (item: any) => {
+  if (item.courseChapterId === clickedChapter.value?.courseChapterId) {
+    return;
+  }
   loading.value = true;
   clickedChapter.value = item;
-
 };
 
 // 2. 把這個函式「廣播」給所有子孫組件，鑰匙叫做 'onChapterClick'
@@ -102,5 +111,13 @@ onMounted(() => {
   min-height: 90vh;
   padding: 1rem;
   border-radius: 8px;
+}
+
+.is-completed-tag {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  color: #fff;
+  font-size: 0.9rem;
 }
 </style>

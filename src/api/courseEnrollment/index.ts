@@ -1,5 +1,6 @@
 import request from '@/utils/request'
 import { EnrollCourseRequest } from './type'
+import { CourseStatusEnum } from '@/constants/enums/CourseStatusEnum'
 
 const BASE_URL = '/course-enrollment'
 
@@ -10,7 +11,7 @@ export function getCourseEnrollmentById(id: string) {
   })
 }
 
-export function findCourseEnrollmentByOwnerAndPaginationApi(page: number, size: number, status?: string) {
+export function findCourseEnrollmentByOwnerAndPaginationApi(page: number, size: number, status?: CourseStatusEnum) {
   return request({
     url: `${BASE_URL}/pagination`,
     method: 'get',
@@ -34,6 +35,19 @@ export function cancelEnrollmentApi(courseEnrollmentId: string) {
   return request({
     url: `${BASE_URL}/${courseEnrollmentId}`,
     method: 'delete'
+  })
+}
+
+export function getLearnRecordListApi(page: number, size: number, queryText: string, status?: CourseStatusEnum) {
+  return request({
+    url: `${BASE_URL}/learning-record`,
+    method: 'get',
+    params: {
+      page,
+      size,
+      queryText,
+      status
+    }
   })
 }
 

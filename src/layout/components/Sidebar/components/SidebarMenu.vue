@@ -4,8 +4,8 @@
     :background-color="variables['menu-background']" :text-color="variables['menu-text']"
     :active-text-color="variables['menu-active-text']" :unique-opened="false" :collapse-transition="false"
     :mode="layout === 'top' ? 'horizontal' : 'vertical'">
-    <SidebarMenuItem v-for="route in menuList" :key="route.path" :item="route" :base-path="resolvePath(route.path)"
-      :is-collapse="!appStore.sidebar.opened" />
+    <SidebarMenuItem v-for="route in menuList" :key="route.name || route.path" :item="route"
+      :base-path="resolvePath(route.path)" :is-collapse="!appStore.sidebar.opened" />
   </el-menu>
 </template>
 

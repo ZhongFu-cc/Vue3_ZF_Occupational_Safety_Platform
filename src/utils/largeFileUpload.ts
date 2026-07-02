@@ -122,7 +122,6 @@ export async function checkFileIsExist(endpoint: string, data: string) {
 }
 
 export async function fileUpload(
-  checkResult: any,
   file: File,
   hash: string,
   chunks: Blob[],
@@ -131,48 +130,48 @@ export async function fileUpload(
   method: string,
   payload: any
 ) {
-  if (!checkResult.data.exist) {
+  // if (!checkResult.data.exist) {
 
-    const MAX_CONCURRENT = 5; // 設置最大併發數量
-    const uploadChunk = async (chunk: Blob, index: number) => {
-      // 設置要回傳的 chunk info
-      const data = {
-        fileName: file.name,
-        fileType: file.type,
-        fileSha256: hash,
-        chunkIndex: index,
-        totalChunks: chunks.length,
-      };
-
-
-      const formData = new FormData();
-      payload.chunkUploadDTO = data;
-      // const payload = {
-      //   courseChapterId,
-      //   chunkUploadDTO: data,
-      // }
-
-
-
-      formData.append("file", chunk);
-      formData.append("data", JSON.stringify(payload));
-      if (data == null) {
-      }
-      await slideUploadApi(formData, endpoint, method);
+  const MAX_CONCURRENT = 5; // 設置最大併發數量
+  const uploadChunk = async (chunk: Blob, index: number) => {
+    // 設置要回傳的 chunk info
+    const data = {
+      fileName: file.name,
+      fileType: file.type,
+      fileSha256: hash,
+      chunkIndex: index,
+      totalChunks: chunks.length,
     };
 
-    // 將 chunks 陣列中的每個 chunk 轉換為 Promise
-    const uploadTasks = chunks.map(
-      (chunk, index) => () => uploadChunk(chunk, index)
-    );
-    await limitConcurrency(uploadTasks, MAX_CONCURRENT, percentage);
-    percentage.value = 100; // 上傳完成後設置為 100%
-  } else {
-    percentage.value = 100;
-    let baseUrl = import.meta.env.VITE_MINIO_API_URL;
-    let url = `${baseUrl}/zf-platform2026/${checkResult.data.path}`;
-    return url;
-  }
+
+    const formData = new FormData();
+    payload.chunkUploadDTO = data;
+    // const payload = {
+    //   courseChapterId,
+    //   chunkUploadDTO: data,
+    // }
+
+
+
+    formData.append("file", chunk);
+    formData.append("data", JSON.stringify(payload));
+    if (data == null) {
+    }
+    await slideUploadApi(formData, endpoint, method);
+  };
+
+  // 將 chunks 陣列中的每個 chunk 轉換為 Promise
+  const uploadTasks = chunks.map(
+    (chunk, index) => () => uploadChunk(chunk, index)
+  );
+  await limitConcurrency(uploadTasks, MAX_CONCURRENT, percentage);
+  percentage.value = 100; // 上傳完成後設置為 100%
+  // } else {
+  //   percentage.value = 100;
+  //   let baseUrl = import.meta.env.VITE_MINIO_API_URL;
+  //   let url = `${baseUrl}/zf-platform2026/${checkResult.data.path}`;
+  //   return url;
+  // }
 }
 
 function slideUploadApi(data: any, endpoint: string, method: string) {

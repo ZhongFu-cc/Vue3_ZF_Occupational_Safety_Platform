@@ -1,5 +1,6 @@
 import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { useUserStoreHook } from "@/store/modules/user";
+import { ElNotification } from "element-plus";
 
 // 创建 axios 实例
 const service = axios.create({
@@ -54,17 +55,23 @@ service.interceptors.response.use(
     if (response.status == 200 && response.data instanceof Blob) {
       return response;
     }
-    ElMessage.error(msg || "系统出错");
+    // ElMessage.error(msg || "系统出错");
+    ElNotification.error({
+      title: "系統錯誤",
+      message: msg,
+    })
     return Promise.reject(new Error(msg || "Error"));
   },
   (error: any) => {
 
-    console.log(error)
     if (error.response.data) {
       const { status, data } = error.response;
 
       // 統一返回後端錯誤信息
-      ElMessage.error(data.msg)
+      ElNotification.error({
+        title: "系統錯誤",
+        message: data.msg,
+      })
 
       if (status == 401) {
         if (localStorage.getItem("Authorization-paper-reviewer")) {

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-segmented v-model="selectMethod" :options="options" block />
+    <!-- <el-segmented v-model="selectMethod" :options="options" block /> -->
 
 
     <el-upload ref="upload" class="upload-demo" :limit="1" :on-change="handleUpload" :auto-upload="false"
@@ -28,17 +28,30 @@ import { tryCatch } from '@/utils/tryCatch';
 import { findChapterVideoByCourseChapterIdApi } from '@/api/chapterVideo';
 import { ChapterVideo } from '@/api/chapterVideo/type';
 
+const minioUrl = import.meta.env.VITE_MINIO_API_URL as string
 const selectMethod = ref<string>('post')
-const options = [
-  { label: '上傳影片', value: 'post' },
-  { label: '更新影片', value: 'put' },
-]
+// const options = [
+//   { label: '上傳影片', value: 'post' },
+//   { label: '更新影片', value: 'put' },
+// ]
+
+// const options = computed(() => {
+//   if (chapterVideo.chapterVideoId) {
+//     return [
+//       { label: '更新影片', value: 'put' },
+//     ]
+//   } else {
+//     return [
+//       { label: '上傳影片', value: 'post' },
+//     ]
+//   }
+// })
 
 const payload = reactive<any>({})
-watch(selectMethod, (newVal) => {
-  console.log('選擇的上傳方式:', newVal);
-  videoUrl.value = ''
-});
+// watch(selectMethod, (newVal) => {
+//   console.log('選擇的上傳方式:', newVal);
+//   videoUrl.value = ''
+// });
 
 
 const props = defineProps<{
@@ -74,6 +87,8 @@ const initPlayer = () => {
 
 const upload = ref<UploadInstance>()
 
+const videoUrl = ref<string>('')
+
 
 const chapterVideo = reactive<ChapterVideo>({} as ChapterVideo)
 const findChapterVideoByCourseChapterId = async () => {
@@ -89,8 +104,14 @@ const findChapterVideoByCourseChapterId = async () => {
   }
 
   Object.assign(chapterVideo, res.data)
+  console.log('chapterVideo', chapterVideo)
   if (chapterVideo.chapterVideoId) {
     selectMethod.value = 'put'
+    videoUrl.value = minioUrl + chapterVideo.path
+    console.log('videoUrl', videoUrl.value)
+    initPlayer();
+  } else {
+    selectMethod.value = 'post'
   }
 };
 
@@ -111,7 +132,6 @@ const percentage = ref<number>(0)
 const FILE_SIZE_LIMIT = 200 * 1024 * 1024; // 200MB
 const FILE_TYPE = 'video/mp4'
 
-const videoUrl = ref<string>('')
 
 
 const handleUpload: UploadProps['onChange'] = async (file: UploadUserFile, uploadFiles) => {
@@ -142,28 +162,27 @@ const handleUpload: UploadProps['onChange'] = async (file: UploadUserFile, uploa
 
     percentage.value = 0;
     percentage.value += 1;
+    console.log(selectMethod.value)
     let res = await hashFile(file.raw)
     hashCode.value = res.hash;
     totalChunks.value = res.chunks.length;
     percentage.value += 9;
-    let checkResult = await checkFileIsExist('/chapter-video/check', hashCode.value)
-    console.log('checkResult', checkResult)
+    await checkFileIsExist('/chapter-video/check', hashCode.value)
     if (selectMethod.value === 'put') {
       payload.chapterVideoId = chapterVideo.chapterVideoId;
     } else {
       payload.courseChapterId = props.courseChapterId;
     }
     console.log('payload', payload)
-    const url = await fileUpload(checkResult, res.file, res.hash, res.chunks, percentage, '/chapter-video', selectMethod.value, payload)
+    await fileUpload(res.file, res.hash, res.chunks, percentage, '/chapter-video', selectMethod.value, payload)
 
-    if (url) {
-      ElNotification.success({
-        title: 'Success',
-        message: '影片上傳成功',
-      });
-      videoUrl.value = url;
-      initPlayer();
-    }
+    ElNotification.success({
+      title: selectMethod.value === 'post' ? '上傳成功' : '更新成功',
+      message: selectMethod.value === 'post' ? '影片上傳成功' : '影片更新成功',
+    });
+    findChapterVideoByCourseChapterId()
+
+    // 
   }
 
 }

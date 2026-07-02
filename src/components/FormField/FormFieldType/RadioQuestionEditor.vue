@@ -6,8 +6,9 @@
 
     <transition-group name="move" tag="div">
       <div class="radio-item" v-for="choice in props.field.options?.choices" :key="choice.id">
-        <div class="option-item">
-          <img :src="radioUncheckedSvg" />
+        <div class="option-item" :class="{ 'correct-answer': choice.correctAnswer }">
+          <img v-if="!choice.correctAnswer" :src="radioUncheckedSvg" @click="setChoiceCorrectAnswer(choice.id, true)" />
+          <img v-else :src="radioCheckedSvg" />
           <el-input :model-value="choice.label" @update:model-value="val => updateChoice(choice.id, val)"
             placeholder="選項內容" @blur="emit('commit')"></el-input>
         </div>
@@ -70,9 +71,11 @@ import { useQuestionEditorBase } from "@/components/FormField/FormFieldType/comp
 import QuestionHeader from "@/components/FormField/FormFieldCommon/QuestionHeader.vue";
 import QuestionFooter from "@/components/FormField/FormFieldCommon/QuestionFooter.vue";
 import radioUncheckedSvg from "@/assets/icons/radio-unchecked.svg";
+import radioCheckedSvg from "@/assets/icons/radio-checked3.svg";
 import deleteSvg from "@/assets/icons/delete.svg";
 import arrowDownSng from "@/assets/icons/arrow-down.svg"
 import arrowUpSng from "@/assets/icons/arrow-up.svg"
+import { ElNotification } from "element-plus";
 
 // 誰能進來 父 -> 子
 const props = defineProps<{
@@ -121,6 +124,26 @@ const updateChoice = (choiceId: string, newLabel: string) => {
   emit("update-local", { options });
 };
 
+const setChoiceCorrectAnswer = (choiceId: string, isCorrect: boolean) => {
+  const options = getUpdatedOptions();
+  const previousCorrectChoice = options.choices.find(c => c.correctAnswer);
+
+  const target = options.choices.find(c => c.id === choiceId);
+  if (!target) return;
+  if (previousCorrectChoice && previousCorrectChoice.id !== choiceId) {
+    previousCorrectChoice.correctAnswer = false;
+  }
+  target.correctAnswer = isCorrect;
+  emit("update-local", { options });
+  emit("commit")
+
+  ElNotification.success({
+    title: '成功',
+    message: `已將 "${target.label}" 設為正確答案`,
+    duration: 2000,
+  })
+};
+
 
 /** 新增選項 */
 const addChoice = () => {
@@ -129,6 +152,7 @@ const addChoice = () => {
     id: crypto.randomUUID(),
     label: `選項 ${options.choices.length + 1}`,
     imgUrl: "",
+    correctAnswer: false
   });
   emit("update-local", { options });
   emit("commit");
@@ -254,6 +278,12 @@ const removeOther = () => {
       display: flex;
       align-items: center;
       width: 100%;
+      padding: 0.5rem;
+      border-radius: 8px;
+
+      &.correct-answer {
+        background-color: #ecfdf5;
+      }
     }
 
     .option-item-function-bar {

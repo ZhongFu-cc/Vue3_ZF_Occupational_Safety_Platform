@@ -227,15 +227,23 @@ const handleFormInfoBlur = async (field: "title" | "description") => {
 // 預設問題
 let createDefaultField = () => {
   return <FormField>{
-    fieldType: FieldType.TEXT,
+    fieldType: FieldType.RADIO,
     label: "問題",
     description: "說明(選填)",
     placeholder: "簡答文字",
     imageUrl: "",
     imageCaption: "",
     isRequired: 0,
+    isMarkCorrectAnswer: 1,
     fieldOrder: 0,
-    options: null,
+    options: {
+      choices: [{
+        id: crypto.randomUUID(),
+        label: `選項 1`,
+        imgUrl: "",
+        correctAnswer: false
+      }],
+    },
     validationRules: null,
   };
 };
@@ -374,6 +382,7 @@ const handleDeleteField = async (fieldId: string) => {
 
 const handleAddField = async (afterIndex: number) => {
   const newField = createDefaultField();
+  console.log("新增問題: ", newField, "插入位置: ", afterIndex);
 
   if (formFieldList.length === 0) {
     newField.fieldOrder = 100;

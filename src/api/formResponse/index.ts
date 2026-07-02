@@ -1,5 +1,6 @@
 import request from "@/utils/request";
 import { AxiosPromise } from "axios";
+import { QuizResponseDTO } from "./type";
 
 /**
  * 獲取可編輯表單回覆 (單一表單回覆)
@@ -73,5 +74,13 @@ export function downloadExcelApi(id: string): AxiosPromise {
     params: {
       formId: id,
     }
+  });
+}
+
+export function answerQuizApi(data: QuizResponseDTO): AxiosPromise {
+  return request({
+    url: "/form-response/answering-quiz",
+    method: "post",
+    data,
   });
 }

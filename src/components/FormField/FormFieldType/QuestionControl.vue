@@ -85,19 +85,19 @@ const emitMoveDown = () => {
 };
 
 const componentMap: Record<FieldType, any> = {
-  [FieldType.TEXT]: TextQuestionEditor,
-  [FieldType.TEXTAREA]: TextareaQuestionEditor,
+  // [FieldType.TEXT]: TextQuestionEditor,
+  // [FieldType.TEXTAREA]: TextareaQuestionEditor,
   [FieldType.RADIO]: RadioQuestionEditor,
-  [FieldType.CHECKBOX]: CheckboxQuestionEditor,
-  [FieldType.SELECT]: SelectQuestionEditor,
-  [FieldType.RATE]: RateQuestionEditor,
+  // [FieldType.CHECKBOX]: CheckboxQuestionEditor,
+  // [FieldType.SELECT]: SelectQuestionEditor,
+  // [FieldType.RATE]: RateQuestionEditor,
 
-  // 尚未製作
-  [FieldType.NUMBER]: NumberQuestionEditor,
-  [FieldType.EMAIL]: EmailQuestionEditor,
-  [FieldType.DATE]: DateQuestionEditor,
-  [FieldType.SECTION]: CheckboxQuestionEditor,
-  [FieldType.IMAGE]: CheckboxQuestionEditor,
+  // // 尚未製作
+  // [FieldType.NUMBER]: NumberQuestionEditor,
+  // [FieldType.EMAIL]: EmailQuestionEditor,
+  // [FieldType.DATE]: DateQuestionEditor,
+  // [FieldType.SECTION]: CheckboxQuestionEditor,
+  // [FieldType.IMAGE]: CheckboxQuestionEditor,
 };
 </script>
 

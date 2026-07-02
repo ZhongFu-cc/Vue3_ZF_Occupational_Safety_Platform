@@ -36,40 +36,40 @@ import starSvg from "@/assets/icons/star.svg";
 
 // 選項及icon映射表
 const typeIconMap: Partial<Record<FieldType, string>> = {
-  [FieldType.TEXT]: shortAnswer,
-  [FieldType.TEXTAREA]: detailedAnswer,
+  // [FieldType.TEXT]: shortAnswer,
+  // [FieldType.TEXTAREA]: detailedAnswer,
   [FieldType.RADIO]: radioCheckedSvg,
-  [FieldType.CHECKBOX]: checkboxCheckedSvg,
-  [FieldType.SELECT]: selectSvg,
-  [FieldType.RATE]: starSvg,
+  // [FieldType.CHECKBOX]: checkboxCheckedSvg,
+  // [FieldType.SELECT]: selectSvg,
+  // [FieldType.RATE]: starSvg,
 };
 
 // 題型選項
 const options = [
-  {
-    value: FieldType.TEXT,
-    label: "簡答",
-  },
-  {
-    value: FieldType.TEXTAREA,
-    label: "詳答",
-  },
+  // {
+  //   value: FieldType.TEXT,
+  //   label: "簡答",
+  // },
+  // {
+  //   value: FieldType.TEXTAREA,
+  //   label: "詳答",
+  // },
   {
     value: FieldType.RADIO,
     label: "選擇題",
   },
-  {
-    value: FieldType.CHECKBOX,
-    label: "核取方塊",
-  },
-  {
-    value: FieldType.SELECT,
-    label: "下拉式選單",
-  },
-  {
-    value: FieldType.RATE,
-    label: "評分",
-  },
+  // {
+  //   value: FieldType.CHECKBOX,
+  //   label: "核取方塊",
+  // },
+  // {
+  //   value: FieldType.SELECT,
+  //   label: "下拉式選單",
+  // },
+  // {
+  //   value: FieldType.RATE,
+  //   label: "評分",
+  // },
 ];
 
 // 誰能進來 父 -> 子
