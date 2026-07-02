@@ -1,22 +1,16 @@
 <template>
   <div v-if="!item.meta || !item.meta.hidden">
     <!-- 显示具有单个子路由的菜单项或没有子路由的父路由 -->
-    <template
-      v-if="
-        hasOneShowingChild(item.children, item as RouteRecordRaw) &&
-        (!onlyOneChild.children || onlyOneChild.noShowingChildren) &&
-        !item.meta?.alwaysShow
-      "
-    >
+    <template v-if="
+      hasOneShowingChild(item.children, item as RouteRecordRaw) &&
+      (!onlyOneChild.children || onlyOneChild.noShowingChildren) &&
+      !item.meta?.alwaysShow
+    ">
       <AppLink v-if="onlyOneChild.meta" :to="resolvePath(onlyOneChild.path)">
-        <el-menu-item
-          :index="resolvePath(onlyOneChild.path)"
-          :class="{ 'submenu-title-noDropdown': !isNest }"
-        >
-          <SidebarMenuItemTitle
-            :icon="onlyOneChild.meta.icon || (item.meta && item.meta.icon)"
-            :title="onlyOneChild.meta.title"
-          />
+        <el-menu-item :key="onlyOneChild.name || onlyOneChild.path" :index="resolvePath(onlyOneChild.path)"
+          :class="{ 'submenu-title-noDropdown': !isNest }">
+          <SidebarMenuItemTitle :icon="onlyOneChild.meta.icon || (item.meta && item.meta.icon)"
+            :title="onlyOneChild.meta.title" />
         </el-menu-item>
       </AppLink>
     </template>
@@ -24,20 +18,11 @@
     <!-- 显示具有多个子路由的父菜单项 -->
     <el-sub-menu v-else :index="resolvePath(item.path)" teleported>
       <template #title>
-        <SidebarMenuItemTitle
-          v-if="item.meta"
-          :icon="item.meta && item.meta.icon"
-          :title="item.meta.title"
-        />
+        <SidebarMenuItemTitle v-if="item.meta" :icon="item.meta && item.meta.icon" :title="item.meta.title" />
       </template>
 
-      <SidebarMenuItem
-        v-for="child in item.children"
-        :key="child.path"
-        :is-nest="true"
-        :item="child"
-        :base-path="resolvePath(child.path)"
-      />
+      <SidebarMenuItem v-for="child in item.children" :key="child.name || child.path" :is-nest="true" :item="child"
+        :base-path="resolvePath(child.path)" />
     </el-sub-menu>
   </div>
 </template>
@@ -147,7 +132,7 @@ function resolvePath(routePath: string) {
       }
     }
 
-    & > span {
+    &>span {
       display: inline-block;
       width: 0;
       height: 0;
@@ -159,7 +144,7 @@ function resolvePath(routePath: string) {
   .el-sub-menu {
     overflow: hidden;
 
-    & > .el-sub-menu__title {
+    &>.el-sub-menu__title {
       padding: 0 !important;
 
       .sub-el-icon {
@@ -176,8 +161,8 @@ function resolvePath(routePath: string) {
     width: $sidebar-width-collapsed;
 
     .el-sub-menu {
-      & > .el-sub-menu__title {
-        & > span {
+      &>.el-sub-menu__title {
+        &>span {
           display: inline-block;
           width: 0;
           height: 0;

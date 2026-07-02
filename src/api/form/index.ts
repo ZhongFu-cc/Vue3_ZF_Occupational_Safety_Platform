@@ -77,3 +77,13 @@ export function deleteFormApi(id: string): AxiosPromise {
     method: "delete",
   });
 }
+
+export function getRandomQuizFormApi(formId: string, enrollmentId: string): AxiosPromise {
+  return request({
+    url: `/form/${formId}/random-quiz`,
+    method: "get",
+    params: {
+      enrollmentId,
+    },
+  });
+}

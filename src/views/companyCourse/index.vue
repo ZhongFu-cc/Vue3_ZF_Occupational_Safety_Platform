@@ -25,9 +25,9 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { findAllCompanyCourseListApi, findCompanyCourseListByQueryTextAndPaginationApi } from "@/api/companyCourseManagement";
-import { findCourseEnrollmentByOwnerAndPaginationApi } from "@/api/courseEnrollment";
+import { findCompanyCourseListByQueryTextAndPaginationApi } from "@/api/companyCourseManagement";
 import { CourseEnrollmentVO } from "@/api/courseEnrollment/type";
+import { CourseStatusEnum } from "@/constants/enums/CourseStatusEnum";
 import BasicComponent from "@/layout/components/Basic/index.vue";
 import { tryCatch } from "@/utils/tryCatch";
 import { ElNotification } from "element-plus";
@@ -36,7 +36,7 @@ const minioEnv = import.meta.env.VITE_MINIO_API_URL;
 
 const courseEnrollmentList = ref<CourseEnrollmentVO[]>([]);
 const currentPage = ref(1);
-const status = ref<'not_started' | 'in_progress' | 'completed' | 'cancelled' | 'expired' | undefined>();
+const status = ref<CourseStatusEnum>();
 const queryText = ref<string>('');
 const hasData = computed(() => courseEnrollmentList.value.length > 0);
 

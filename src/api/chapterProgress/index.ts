@@ -21,3 +21,13 @@ export function learningChapterApi(data: ChapterProgressRequest): AxiosPromise<a
     data
   });
 }
+
+export function getChapterByEnrollmentIdApi(courseEnrollmentId: string): AxiosPromise<any> {
+  return request({
+    url: `${BASE_URL}`,
+    method: "get",
+    params: {
+      courseEnrollmentId
+    }
+  });
+}

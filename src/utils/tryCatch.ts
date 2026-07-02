@@ -1,3 +1,5 @@
+import { ElNotification } from "element-plus";
+
 type SuccessCallback<T> = {
   res: T;
   error: null;
@@ -20,3 +22,10 @@ export async function tryCatch<T, E = Error>(
     return { res: null, error: error as E };
   }
 }
+
+export const showError = (message: string) => {
+  ElNotification.error({
+    title: "錯誤",
+    message,
+  });
+};

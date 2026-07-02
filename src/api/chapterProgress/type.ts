@@ -1,10 +1,12 @@
+import { CourseStatusEnum } from "@/constants/enums/CourseStatusEnum";
+
 export interface ChapterProgress {
   chapterProgressId: string;
   courseEnrollmentId: string;
   courseChapterId: string;
   sysUserId: string;
   courseId: string;
-  status: 'not_started' | 'in_progress' | 'completed' | 'expired' | 'cancelled';
+  status: CourseStatusEnum;
   watchCount: number;
   isQuizPassed: 0 | 1;
   quizScore: number;

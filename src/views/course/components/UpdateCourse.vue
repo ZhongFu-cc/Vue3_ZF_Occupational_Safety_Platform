@@ -1,9 +1,9 @@
 <template>
   <div class="update-panel">
-    <el-empty v-if="!hasData" description="請先選擇要編輯的用戶" :image-size="100" />
+    <el-empty v-if="!hasData" description="請先選擇要編輯的課程" :image-size="100" />
 
     <el-form v-else ref="updateFormRef" :model="formData" :rules="rules" class="update-form" label-position="top"
-      @submit.prevent status-icon>
+      status-icon @submit.prevent>
       <el-form-item class="upload-box">
         <!-- <img class="cover-image" :src="minioAPI + props.course?.coverImage" alt=""> -->
         <el-upload class="thumbnail-uploader" :action="envAPI + '/upload/img'" :show-file-list="false"
@@ -24,139 +24,241 @@
       </el-form-item>
 
       <el-form-item label="課程時長(分鐘)" prop="totalMinutes">
-        <el-input v-model.number="formData.totalMinutes" placeholder="請輸入課程時長" type="number" />
+        <el-input v-model.number="formData.totalMinutes" type="number" placeholder="請輸入課程時長" />
       </el-form-item>
 
       <el-form-item label="課程狀態">
-        <el-switch v-model="formData.isActive" :active-value="1" :inactive-value="0"></el-switch>
+        <el-switch v-model="formData.isActive" :active-value="1" :inactive-value="0" />
       </el-form-item>
 
       <div class="action-row">
-        <el-button @click="handleCancel">取消</el-button>
-        <el-button type="primary" :loading="props.submitting" @click="handleSubmit">儲存變更</el-button>
+        <el-button @click="handleCancel">
+          取消
+        </el-button>
+
+        <el-button type="primary" :loading="submitting" @click="handleSubmit">
+          儲存變更
+        </el-button>
       </div>
     </el-form>
   </div>
 </template>
-<script setup lang='ts'>
-import { ElNotification, UploadProps, UploadRawFile, type FormInstance, type FormRules } from 'element-plus';
-import { computed, reactive, ref, watch } from 'vue';
-import { tryCatch } from '@/utils/tryCatch';
-import { Course, UpdateCourse } from '@/api/course/course/type';
-import { updateCourseApi } from '@/api/course/course';
 
+<script setup lang="ts">
+import {
+  ElNotification,
+  type FormInstance,
+  type FormRules,
+  type UploadProps,
+  type UploadRawFile,
+} from "element-plus";
+
+import {
+  computed,
+  reactive,
+  ref,
+  watch,
+} from "vue";
+
+import {
+  updateCourseApi,
+} from "@/api/course/course";
+
+import type {
+  Course,
+  UpdateCourse,
+} from "@/api/course/course/type";
+
+import { tryCatch } from "@/utils/tryCatch";
 
 const props = defineProps<{
   course?: Course;
   submitting?: boolean;
 }>();
 
+const emit = defineEmits<{
+  (e: "submit"): void;
+  (e: "cancel"): void;
+}>();
 
+const envAPI = import.meta.env.VITE_APP_BASE_API;
+const minioAPI = import.meta.env.VITE_MINIO_API_URL;
 
-const emit = defineEmits(['submit', 'cancel']);
-
-console.log(props.course?.coverImage)
-
-const EMPTY_COURSE_CATEGORY: UpdateCourse = {
-  courseId: '',
-  courseCategoryId: '',
-  title: '',
-  description: '',
+const EMPTY_COURSE: UpdateCourse = {
+  courseId: "",
+  courseCategoryId: "",
+  title: "",
+  description: "",
   totalMinutes: 0,
   isActive: 1,
 };
 
-
 const updateFormRef = ref<FormInstance>();
-const formData = reactive<UpdateCourse>({ ...EMPTY_COURSE_CATEGORY });
 
-const hasData = computed(() => Boolean(props.course?.courseId));
+const imageUrl = ref<string>();
 
-const rules = reactive<FormRules<UpdateCourse>>({
-  title: [{ required: true, message: '請輸入課程名稱', trigger: 'blur' }],
-  description: [{ required: true, message: '請輸入課程描述', trigger: 'blur' }],
-  totalMinutes: [{ required: true, message: '請輸入課程時長', trigger: 'blur' }],
+const imgFile = ref<UploadRawFile>();
+
+const formData = reactive<UpdateCourse>({
+  ...EMPTY_COURSE,
 });
 
-const syncFormData = (course: UpdateCourse) => {
-  formData.courseId = course?.courseId ?? '';
-  formData.courseCategoryId = course?.courseCategoryId ?? '';
-  formData.title = course?.title ?? '';
-  formData.description = course?.description ?? '';
-  formData.totalMinutes = course?.totalMinutes ?? 0;
-  formData.isActive = course?.isActive ?? 1;
+const hasData = computed(
+  () => !!props.course?.courseId
+);
+
+const rules = reactive<FormRules<UpdateCourse>>({
+  title: [
+    {
+      required: true,
+      message: "請輸入課程名稱",
+      trigger: "blur",
+    },
+  ],
+
+  description: [
+    {
+      required: true,
+      message: "請輸入課程描述",
+      trigger: "blur",
+    },
+  ],
+
+  totalMinutes: [
+    {
+      required: true,
+      message: "請輸入課程時長",
+      trigger: "blur",
+    },
+  ],
+});
+
+const showError = (message: string) => {
+  ElNotification({
+    title: "錯誤",
+    message,
+    type: "error",
+  });
 };
 
+const showSuccess = (message: string) => {
+  ElNotification({
+    title: "成功",
+    message,
+    type: "success",
+  });
+};
 
+const syncFormData = (
+  course?: Course
+) => {
+  Object.assign(formData, {
+    courseId: course?.courseId ?? "",
+    courseCategoryId:
+      course?.courseCategoryId ?? "",
+    title: course?.title ?? "",
+    description:
+      course?.description ?? "",
+    totalMinutes:
+      course?.totalMinutes ?? 0,
+    isActive: course?.isActive ?? 1,
+  });
+};
+
+const handleImageUpload: UploadProps["onSuccess"] =
+  (_, uploadFile) => {
+    if (!uploadFile.raw) {
+      return;
+    }
+
+    imageUrl.value = URL.createObjectURL(
+      uploadFile.raw
+    );
+
+    imgFile.value = uploadFile.raw;
+  };
 
 const handleCancel = () => {
-  emit('cancel');
+  updateFormRef.value?.resetFields();
+
+  imageUrl.value = undefined;
+  imgFile.value = undefined;
+
+  emit("cancel");
 };
-
-const imageUrl = ref();
-let imgFile = <UploadRawFile>{}
-const envAPI = import.meta.env.VITE_APP_BASE_API;
-const minioAPI = import.meta.env.VITE_MINIO_API_URL;
-const handleImageUpload: UploadProps['onSuccess'] = (response, uploadFile) => {
-  imageUrl.value = URL.createObjectURL(uploadFile.raw!);
-  imgFile = uploadFile.raw!;
-}
-
-watch(
-  () => props.course,
-  (value) => {
-    syncFormData(value || ({} as UpdateCourse));
-    updateFormRef.value?.clearValidate();
-
-    if (props.course?.coverImage) {
-      imageUrl.value = minioAPI + props.course.coverImage;
-    } else {
-      imageUrl.value = undefined;
-    }
-  },
-  { immediate: true, deep: true }
-);
 
 const handleSubmit = async () => {
   if (!updateFormRef.value) {
     return;
   }
 
-  const valid = await updateFormRef.value.validate().catch(() => false);
+  const valid =
+    await updateFormRef.value
+      .validate()
+      .catch(() => false);
+
   if (!valid) {
     return;
   }
 
   const payload = new FormData();
-  payload.append('data', JSON.stringify(formData));
-  if (imgFile) {
-    payload.append('imgFile', imgFile);
+
+  payload.append(
+    "data",
+    JSON.stringify(formData)
+  );
+
+  if (imgFile.value) {
+    payload.append(
+      "imgFile",
+      imgFile.value
+    );
   }
 
-  console.log(payload.get('imgFile'))
+  const { res, error }: any =
+    await tryCatch(
+      updateCourseApi(payload)
+    );
 
-  const { res, error }: any = await tryCatch(updateCourseApi(payload));
-  if (error || res.code !== 200) {
-    ElNotification({
-      title: '錯誤',
-      message: '無法更新課程資訊',
-      type: 'error',
-    });
+  if (error || res?.code !== 200) {
+    showError(
+      res?.message || "無法更新課程資訊"
+    );
     return;
   }
 
-  updateFormRef.value.resetFields();
-  ElNotification({
-    title: '成功',
-    message: '課程資訊已更新',
-    type: 'success',
-  });
-  emit('submit');
+  showSuccess("課程資訊已更新");
+
+  emit("submit");
 };
 
+watch(
+  () => props.course,
+  (course) => {
+    syncFormData(course);
 
+    updateFormRef.value?.clearValidate();
+
+    imgFile.value = undefined;
+
+    imageUrl.value =
+      course?.coverImage
+        ? minioAPI + course.coverImage
+        : undefined;
+  },
+  {
+    immediate: true,
+  }
+);
+
+onBeforeMount(() => {
+  if (imageUrl.value?.startsWith("blob:")) {
+    URL.revokeObjectURL(imageUrl.value);
+  }
+})
 </script>
-<style lang='scss' scoped>
+
+<style lang="scss" scoped>
 .update-panel {
   min-height: 220px;
 }
@@ -172,58 +274,56 @@ const handleSubmit = async () => {
   margin-top: 8px;
 }
 
-@media (max-width: 768px) {
-  .action-row {
-    justify-content: space-between;
-  }
-}
-
 .upload-box {
   :deep(.el-form-item__content) {
     display: flex;
     justify-content: center;
     padding: 1rem 0;
-
   }
 }
 
 .el-icon.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
   width: 178px;
   height: 178px;
-  text-align: center;
-}
 
-.cover-image {
-  width: 178px;
-  border-radius: 6px;
-  margin-bottom: 16px;
+  font-size: 28px;
+  color: #8c939d;
+
+  text-align: center;
 }
 
 .thumbnail-uploader {
   .avatar {
     width: 100%;
     height: 100%;
+
     object-fit: cover;
   }
 
   :deep(.el-upload) {
-    max-width: 400px;
-    /* 限制最大寬度 */
-    height: 220px;
-    aspect-ratio: 16/9;
-    border: 2px dashed #ccc;
-    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    max-width: 400px;
+    height: 220px;
+
     overflow: hidden;
+
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+
+    aspect-ratio: 16 / 9;
   }
 
   .el-upload:hover {
     border-color: var(--el-color-primary);
   }
+}
 
+@media (max-width: 768px) {
+  .action-row {
+    justify-content: space-between;
+  }
 }
 </style>

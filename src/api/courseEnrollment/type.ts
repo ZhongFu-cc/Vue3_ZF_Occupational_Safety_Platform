@@ -1,3 +1,5 @@
+import { CommonStatusEnum } from "@/constants/enums/CommonStatusEnum";
+import { CourseStatusEnum } from "@/constants/enums/CourseStatusEnum";
 
 
 export interface CourseEnrollmentVO {
@@ -8,10 +10,10 @@ export interface CourseEnrollmentVO {
   courseName: string;
   courseDescription: string;
   courseCoverImage: string;
-  status: 'not_started' | 'in_progress' | 'completed' | 'expired' | 'cancelled';
+  status: CourseStatusEnum;
   totalChapters: number;
   completedChapters: number;
-  isChapterDone: 0 | 1;
+  isChaptersDone: 0 | 1;
   accumulatedSeconds: number;
   requiredSeconds: number;
   isMinutesMet: 0 | 1;
@@ -27,5 +29,21 @@ export interface CourseEnrollmentVO {
 
 export interface EnrollCourseRequest {
   courseId: string;
+}
+
+export interface LearningRecordVO {
+  courseEnrollmentId: string,
+  sysUserId: string,
+  courseId: string,
+  courseName: string,
+  status: CourseStatusEnum,
+  progress: string,
+  isChaptersDone: CommonStatusEnum,
+  accumulatedSeconds: number,
+  isMinutesMet: CommonStatusEnum,
+  startedAt: string,
+  completedAt: string,
+  expiredAt: string,
+  isCompleted: CommonStatusEnum
 }
 

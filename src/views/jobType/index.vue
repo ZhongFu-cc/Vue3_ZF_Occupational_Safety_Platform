@@ -17,7 +17,7 @@
             <template #default="{ row }">
               <el-button type="primary" link @click="updateDialogState.open(row)">編輯</el-button>
               <el-button type="danger" link @click="deleteJobTypeById(row.id)">刪除</el-button>
-              <el-button type="warning" link @click="goToCourseType(row.jobTypeId)">課程</el-button>
+              <el-button type="warning" link @click="navigateToCourse(row.jobTypeId)">課程</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -119,8 +119,11 @@ const updateDialogState = reactive({
   }
 })
 
-const goToCourseType = (jobTypeId: string) => {
-  router.push(`/job-type-course/${jobTypeId}`);
+const navigateToCourse = (jobTypeId: string) => {
+  router.push({
+    name: 'jobTypeCoursePage',
+    params: { jobTypeId }
+  });
 }
 
 onMounted(() => {

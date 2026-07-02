@@ -24,23 +24,14 @@ export interface FormDto {
 }
 
 export enum FieldType {
-  TEXT = "text",
-  TEXTAREA = "textarea",
-  NUMBER = "number",
-  EMAIL = "email",
-  SELECT = "select",
   RADIO = "radio",
-  RATE = "rate",
-  CHECKBOX = "checkbox",
-  DATE = "date",
-  SECTION = "section",
-  IMAGE = "image",
 }
 
 export interface Choice {
   id: string;
   label: string;
   imgUrl: string;
+  correctAnswer: boolean;
 }
 
 
@@ -81,6 +72,7 @@ export interface FormField {
   fieldType: FieldType;
   label: string;
   description: string;
+  isMarkCorrectAnswer: number;
   placeholder: string;
   imageUrl: string;
   imageCaption: string;
@@ -88,5 +80,6 @@ export interface FormField {
   fieldOrder: number;
   options: null | Option;
   validationRules: null | ValidationRule;
-  answer?: any
+  answer?: any,
+
 }

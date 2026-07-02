@@ -35,6 +35,11 @@
                   <Upload />
                 </el-icon><span>上傳</span>
               </el-button>
+              <el-button v-if="row.contentType === 'quiz'" type="info" link @click="navigateToQuizSet(row)">
+                <el-icon>
+                  <Upload />
+                </el-icon><span>題目</span>
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -148,6 +153,13 @@ const videoUploadDialogState = reactive({
     videoUploadDialogState.isOpen = false
   },
 })
+const router = useRouter()
+const navigateToQuizSet = (row: any) => {
+  router.push({
+    name: 'quizSet',
+    params: { formId: row.formId }
+  })
+}
 
 const deleteChapterById = async (courseChapterId: string) => {
   ElMessageBox.confirm('確定要刪除這個章節嗎？', '警告', {

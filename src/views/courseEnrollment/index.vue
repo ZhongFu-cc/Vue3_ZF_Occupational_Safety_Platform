@@ -1,9 +1,14 @@
 <template>
   <div>
-    <BasicComponent title="已報名課程">
+    <BasicComponent title="已報名課程" :total-count="totalEnrollmentCount + ' 筆'">
+      <template #search-box>
+        <el-select v-model="status" placeholder="選擇課程狀態" clearable @change="getCourseEnrollmentList">
+          <el-option v-for="item in COURSE_STATUS_OPTIONS" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
+      </template>
       <template #data-table>
         <div v-if="hasData" class="course-box">
-          <el-card v-for="course in courseEnrollmentList" class="course-card" @click="headToCourseLearn(course)">
+          <el-card v-for="course in courseEnrollmentList" class="course-card" @click="navigateToCourseLearning(course)">
             <template #header>
               <div class="image-box">
                 <el-image class="cover-image" :src="`${minioEnv}${course.courseCoverImage}`"></el-image>
@@ -14,6 +19,9 @@
                 <h2 class="course-title">{{ course.courseName }}</h2>
                 <div class="course-detail">
                   <p>總章節數: {{ course.totalChapters }}</p>
+                </div>
+                <div class="is-completed-tag" v-if="course.isChaptersDone === 1">
+                  Completed
                 </div>
               </div>
             </template>
@@ -27,15 +35,18 @@
 <script lang="ts" setup>
 import { findCourseEnrollmentByOwnerAndPaginationApi } from "@/api/courseEnrollment";
 import { CourseEnrollmentVO } from "@/api/courseEnrollment/type";
+import { CourseStatusEnum, COURSE_STATUS_OPTIONS } from "@/constants/enums/CourseStatusEnum";
 import BasicComponent from "@/layout/components/Basic/index.vue";
 import { tryCatch } from "@/utils/tryCatch";
 import { ElNotification } from "element-plus";
 
 const minioEnv = import.meta.env.VITE_MINIO_API_URL;
 
+const totalEnrollmentCount = ref<number>(0);
 const courseEnrollmentList = ref<CourseEnrollmentVO[]>([]);
 const currentPage = ref(1);
-const status = ref<'not_started' | 'in_progress' | 'completed' | 'cancelled' | 'expired' | undefined>();
+const status = ref<CourseStatusEnum>();
+
 const hasData = computed(() => courseEnrollmentList.value.length > 0);
 
 
@@ -48,15 +59,16 @@ const getCourseEnrollmentList = async () => {
     });
     return;
   }
-
+  console.log("getCourseEnrollmentList", res.data.records);
   courseEnrollmentList.value = res.data.records;
+  totalEnrollmentCount.value = res.data.total;
 
 };
 
 const router = useRouter();
-const headToCourseLearn = (course: any) => {
+const navigateToCourseLearning = (course: any) => {
   router.push({
-    path: "/course-learn-page",
+    name: "courseLearnPage",
     query: {
       courseId: course.courseId,
       courseEnrollmentId: course.courseEnrollmentId,
@@ -69,13 +81,20 @@ onMounted(() => {
 });
 </script>
 <style lang="scss" scoped>
+.el-select {
+  width: 200px;
+}
+
 .course-box {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 16px;
 }
 
 .course-card {
+  position: relative;
+
   width: 20rem;
   border-radius: 8px;
   overflow: hidden;
@@ -121,6 +140,19 @@ onMounted(() => {
 
   .course-detail {
     color: rgb(158, 154, 154);
+  }
+
+  .is-completed-tag {
+    position: absolute;
+    top: 1.5rem;
+    right: 0.5rem;
+    background-color: #409eff;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    transform: rotate(20deg);
+    z-index: 100;
   }
 }
 </style>
