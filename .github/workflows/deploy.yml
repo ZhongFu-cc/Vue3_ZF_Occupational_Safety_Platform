@@ -66,7 +66,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            sudo cp -r /home/user/front-end/backstage/* /usr/share/nginx/html/background
+            sudo cp -r /home/user/front-end/backstage/* /usr/share/nginx/html/
         
   
     
