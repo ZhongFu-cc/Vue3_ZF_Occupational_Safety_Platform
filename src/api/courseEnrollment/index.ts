@@ -51,3 +51,10 @@ export function getLearnRecordListApi(page: number, size: number, queryText: str
   })
 }
 
+export function getLearnRecordSummatyByOwnerApi() {
+  return request({
+    url: `${BASE_URL}/learning-record/summary`,
+    method: 'get'
+  })
+}
+

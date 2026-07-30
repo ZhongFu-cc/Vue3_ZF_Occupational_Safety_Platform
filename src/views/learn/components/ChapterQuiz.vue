@@ -1,8 +1,8 @@
 <template>
   <div class="form-box">
     <el-form ref="formRef" :model="formModel" :rules="formRules" label-position="top">
-      <template v-for="field in fillableForm.formFields" :key="field.formFieldId">
-        <el-form-item :label="field.label" :prop="field.formFieldId">
+      <template v-for="(field, index) in fillableForm.formFields" :key="field.formFieldId">
+        <el-form-item :label="'Q' + (index + 1) + '. ' + field.label" :prop="field.formFieldId">
           <component :is="resolveComponent(field)" v-model="formModel[field.formFieldId]" :field="field" />
         </el-form-item>
       </template>
@@ -267,6 +267,17 @@ watch(
     .function-bar .submit-btn {
       width: 100%;
       min-width: 0;
+    }
+  }
+
+  .el-form {
+    :deep(.el-form-item__label) {
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+
+    .el-form-item {
+      margin-bottom: 1.5rem;
     }
   }
 }

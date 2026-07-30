@@ -181,6 +181,7 @@ const deleteChapterById = async (courseChapterId: string) => {
       message: '刪除章節成功',
       type: 'success',
     })
+    console.log('deleteChapterById', courseChapterId)
     getCourseChapterList()
   }).catch(() => {
     // 使用者取消了操作

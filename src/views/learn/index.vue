@@ -68,6 +68,7 @@ const findCourseChapterListByCourseId = async () => {
     });
     return;
   }
+  console.log("findCourseChapterListByCourseId", res.data);
   courseChapterList.value = res.data;
 };
 

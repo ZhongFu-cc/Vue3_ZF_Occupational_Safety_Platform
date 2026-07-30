@@ -47,6 +47,9 @@ const props = defineProps<{
   sysUser: SysUser;
 }>();
 
+
+console.log('props.sysUser: ', props.sysUser);
+
 const EMPTY_TEXT = '-';
 
 const hasData = computed(() => Boolean(props.sysUser?.sysUserId));
