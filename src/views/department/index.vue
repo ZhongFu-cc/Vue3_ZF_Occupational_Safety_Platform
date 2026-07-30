@@ -185,7 +185,7 @@ const deleteDepartment = async (departmentId: string) => {
   });
 }
 
-const handleUpdateStatus = async (department: Department) => {
+const handleUpdateStatus = async (department: any) => {
   const payload = {
     departmentId: department.departmentId,
     name: department.name,
