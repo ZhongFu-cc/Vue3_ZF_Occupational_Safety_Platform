@@ -89,20 +89,8 @@ const initForm = () => {
     const existingAnswer = (field as any).answer?.answerValue;
 
     switch (field.fieldType) {
-      case FieldType.CHECKBOX:
-        // 如果有舊答案，將 "A,B,C" 轉為 ["A", "B", "C"]；否則給空陣列
-        formModel[key] = existingAnswer ? existingAnswer.split(',') : [];
-        break;
-
-      case FieldType.RATE:
-        // Rate 通常需要數字類型，將字串轉為數字
-        formModel[key] = existingAnswer !== undefined ? Number(existingAnswer) : (field.validationRules?.min ?? 0);
-        break;
 
       case FieldType.RADIO:
-      case FieldType.SELECT:
-      case FieldType.TEXT:
-      case FieldType.TEXTAREA:
       default:
         // 其餘類型直接使用字串，若無則給空字串
         formModel[key] = existingAnswer ?? '';
@@ -129,17 +117,7 @@ const getFillableForm = async () => {
 };
 
 const componentMap: Record<string, any> = {
-  [FieldType.TEXT]: TextQuestion,
-  [FieldType.TEXTAREA]: TextareaQuestion,
   [FieldType.RADIO]: RadioQuestion,
-  [FieldType.CHECKBOX]: CheckboxQuestion,
-  [FieldType.SELECT]: SelectQuestion,
-  [FieldType.RATE]: RateQuestion,
-  [FieldType.NUMBER]: TextQuestion,
-  [FieldType.EMAIL]: TextQuestion,
-  [FieldType.DATE]: TextQuestion,
-  [FieldType.SECTION]: TextQuestion,
-  [FieldType.IMAGE]: TextQuestion,
 };
 
 const resolveComponent = (field: ValidFormField) => {
