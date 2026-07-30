@@ -1,6 +1,6 @@
 <template>
   <el-radio-group v-model="model" value-key="id">
-    <el-radio v-for="opt in field.options?.choices ?? []" :key="opt.id" :value="opt.label">
+    <el-radio v-for="(opt, index) in field.options?.choices ?? []" :key="opt.id" :value="opt.label">
       {{ opt.label }}
     </el-radio>
   </el-radio-group>
@@ -28,3 +28,20 @@ const model = computed({
   }
 })
 </script>
+
+<style lang="scss" scoped>
+.el-radio-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  :deep(.el-radio-group__label) {
+    margin-bottom: 8px;
+  }
+
+  :deep(.el-radio__label) {
+    font-size: 1rem;
+
+  }
+}
+</style>

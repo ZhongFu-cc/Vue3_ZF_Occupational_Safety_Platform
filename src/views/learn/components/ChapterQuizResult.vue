@@ -12,7 +12,7 @@
         </thead>
         <tbody>
           <tr v-for="(item, index) in props.quizResult" :key="index">
-            <td>{{ item.question }}</td>
+            <td>Q{{ Number(index) + 1 }}. {{ item.question }}</td>
             <td>{{ item.yourAnswer }}</td>
             <td>{{ item.correctAnswer }}</td>
             <td>

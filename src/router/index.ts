@@ -380,6 +380,31 @@ export const companyManagerDynamicRoutes: RouteRecordRaw[] = [
         },
       },
     ]
+  },
+  {
+    path: "/courseTraningRecord",
+    component: Layout,
+    name: "courseTraningRecord",
+    meta: {
+      title: "學習統計",
+      icon: "el-icon-Avatar",
+      keepAlive: true,
+      alwaysShow: false,
+    },
+    children: [
+      {
+        path: "",
+        component: () => import("@/views/courseTraningRecord/index.vue"),
+        name: "courseTraningRecordPage",
+        meta: {
+          title: "學習統計列表",
+          icon: "el-icon-Avatar",
+          hidden: false,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      }
+    ]
   }
 ]
 
