@@ -33,7 +33,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
   const env = loadEnv(mode, process.cwd());
   return {
     //基礎路徑,預設為/,如果需要放在Nginx內的子目錄這邊也要進行設置
-    base: "/background",
+    base: "/",
     resolve: {
       alias: {
         "@": pathSrc,
