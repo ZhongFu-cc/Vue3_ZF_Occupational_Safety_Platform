@@ -7,12 +7,12 @@
       </div>
 
       <!-- 布局大小 -->
-      <el-tooltip :content="$t('sizeSelect.tooltip')" effect="dark" placement="bottom">
+      <!-- <el-tooltip :content="$t('sizeSelect.tooltip')" effect="dark" placement="bottom">
         <size-select class="setting-item" />
-      </el-tooltip>
+      </el-tooltip> -->
 
       <!-- 語言选择 -->
-      <lang-select class="setting-item" />
+      <!-- <lang-select class="setting-item" /> -->
     </template>
 
     <!-- 用户头像 -->
