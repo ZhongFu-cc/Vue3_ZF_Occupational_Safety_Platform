@@ -17,6 +17,7 @@
           <el-descriptions-item label="電子信箱">{{ displayValue(props.sysUser.email) }}</el-descriptions-item>
           <el-descriptions-item label="聯絡電話">{{ displayValue(props.sysUser.phone) }}</el-descriptions-item>
           <el-descriptions-item label="公司名稱">{{ displayValue(props.sysUser.companyName) }}</el-descriptions-item>
+          <el-descriptions-item label="所屬部門">{{ displayValue(props.sysUser.departmentName) }}</el-descriptions-item>
           <el-descriptions-item label="備註">{{ displayValue(props.sysUser.remark) }}</el-descriptions-item>
         </el-descriptions>
       </el-card>

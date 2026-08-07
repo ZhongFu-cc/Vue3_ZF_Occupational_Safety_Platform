@@ -68,7 +68,7 @@ const INITIAL_FORM: AddCourse = {
   courseCategoryId: '',
   title: '',
   description: '',
-  totalMinutes: 60,
+  totalMinutes: 10,
   isActive: 1,
 };
 
