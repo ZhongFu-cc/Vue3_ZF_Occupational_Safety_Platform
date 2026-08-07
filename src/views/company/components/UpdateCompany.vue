@@ -9,7 +9,7 @@
         <el-input v-model="formData.name" placeholder="請輸入公司名稱" clearable />
       </el-form-item>
 
-      <el-form-item label="電子信箱" prop="status">
+      <el-form-item label="公司狀態" prop="status">
         <el-select v-model="formData.status" placeholder="請選擇公司狀態">
           <el-option label="啟用" value="enabled"></el-option>
           <el-option label="停用" value="disabled"></el-option>

@@ -41,3 +41,10 @@ export function updateCompanyApi(data: UpdateCompany) {
     data,
   });
 }
+
+export function findAllCompanyListApi() {
+  return request({
+    url: `${BASE_URL}`,
+    method: "get",
+  });
+}
