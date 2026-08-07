@@ -49,3 +49,14 @@ export function updateCompanyUserStatusApi(data: UpdateUserStatus): AxiosPromise
     data,
   })
 }
+
+export function importExcelApi(formData: FormData): AxiosPromise<any> {
+  return request({
+    url: `${BASE_URL}/import-excel`,
+    method: 'post',
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+}

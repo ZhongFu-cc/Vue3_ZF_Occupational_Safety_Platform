@@ -9,7 +9,7 @@
       </template>
 
       <template #option-box>
-        <el-button v-if="role === 'company'">匯入</el-button>
+        <el-button v-if="role === 'company'" @click="importDialogState.open" type="success">匯入</el-button>
         <el-button type="primary" @click="createDialogState.open">新增用戶</el-button>
       </template>
 
@@ -56,6 +56,10 @@
       <Create :role="role" @submit="createDialogState.close" @cancel="createDialogState.close" />
     </el-dialog>
 
+    <el-dialog v-model="importDialogState.isOpen" title="匯入用戶">
+      <ImportExcel @submit="importDialogState.close" @cancel="importDialogState.close" />
+    </el-dialog>
+
   </div>
 </template>
 
@@ -64,6 +68,7 @@ import BasicComponent from '@/layout/components/Basic/index.vue'
 import Detail from './components/Detail.vue';
 import Update from './components/UpdateMember.vue';
 import Create from './components/CreateMember.vue';
+import ImportExcel from './components/ImportExcel.vue';
 import type { SysUser, UpdateUserStatus } from '@/api/system/type';
 import { useUserService } from '@/service/UserService';
 import { useAppStore, useUserStore } from '@/store';
@@ -125,6 +130,7 @@ const findUserById = async (sysUserId: string) => {
   }
 
   sysUser.value = res.data;
+  console.log('findUserById res', res, 'error', error);
 }
 
 const handleChangeUserStatus = async (sysUserId: string, isActive: number) => {
@@ -226,6 +232,17 @@ const handleSizeChange = (size: number) => {
   currentPage.value = 1;
   findChildUserByQueryTextAndPagination(currentPage.value, pageSize.value, queryText.value);
 };
+
+const importDialogState = reactive({
+  isOpen: false,
+  open: () => {
+    importDialogState.isOpen = true;
+  },
+  close: () => {
+    importDialogState.isOpen = false;
+    findChildUserByQueryTextAndPagination(currentPage.value, pageSize.value, queryText.value);
+  }
+})
 
 onMounted(() => {
   findChildUserByQueryTextAndPagination(currentPage.value, pageSize.value, queryText.value);

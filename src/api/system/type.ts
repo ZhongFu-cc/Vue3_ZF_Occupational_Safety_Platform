@@ -47,4 +47,5 @@ export interface SysUser {
   createDate: string;
   updateBy: string;
   updateDate: string;
+  departmentName: string;
 }

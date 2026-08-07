@@ -10,7 +10,9 @@
           <p v-if="totalCount" class="total-count">總數量 :{{ totalCount }}</p>
           <slot name="search-box" />
         </div>
-        <slot name="option-box" />
+        <div>
+          <slot name="option-box" />
+        </div>
       </article>
 
       <article class="main-section">
