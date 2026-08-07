@@ -86,14 +86,15 @@ const select = (item: any) => {
 
   .is-completed-tag {
     position: absolute;
-    top: 30%;
-    right: 0.5rem;
+    top: 20%;
+    right: 0.1rem;
     color: white;
+    background-color: #68ce9e;
     padding: 0.2rem 0.5rem;
     border-radius: 4px;
     font-size: 0.8rem;
     line-height: 1;
-    // transform: rotate(20deg);
+    transform: rotate(20deg);
     z-index: 100;
     border: 1px solid #68ce9e;
   }

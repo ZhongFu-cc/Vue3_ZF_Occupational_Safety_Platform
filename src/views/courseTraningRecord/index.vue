@@ -244,6 +244,7 @@ function renderDepartmentChart(data: any[]) {
     )
   }
 
+
   departmentChart.setOption({
     tooltip: {
       trigger: 'axis'

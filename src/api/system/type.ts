@@ -1,3 +1,5 @@
+import { Company } from "../company/type";
+
 export interface AddSysUser {
   account: string;
   password: string;
@@ -20,6 +22,7 @@ export interface PutSysUser {
   companyName: string;
   remark: string;
   departmentId?: string;
+  companyId?: string;
 }
 
 export interface UpdateUserStatus {

@@ -72,30 +72,6 @@ export const constantRoutes: RouteRecordRaw[] = [
 
 export const adminDynamicRoutes: RouteRecordRaw[] = [
   {
-    path: "/member",
-    component: Layout,
-    name: "member",
-    meta: {
-      title: "成員管理",
-      icon: "el-icon-Avatar",
-      keepAlive: true,
-      alwaysShow: false,
-    },
-    children: [
-      {
-        path: "",
-        component: () => import("@/views/member/index.vue"),
-        name: "memberPage",
-        meta: {
-          title: "成員列表",
-          icon: "el-icon-Avatar",
-          hidden: false,
-          roles: ["ADMIN"],
-          keepAlive: true,
-        },
-      },
-    ]
-  }, {
     path: "/job-type",
     component: Layout,
     name: "jobType",
@@ -131,7 +107,8 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
         },
       },
     ]
-  }, {
+  },
+  {
     path: "/company",
     component: Layout,
     name: "company",
@@ -150,6 +127,31 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
           title: "企業列表",
           icon: "el-icon-Avatar",
           hidden: true,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
+    ]
+  },
+  {
+    path: "/member",
+    component: Layout,
+    name: "member",
+    meta: {
+      title: "成員管理",
+      icon: "el-icon-Avatar",
+      keepAlive: true,
+      alwaysShow: false,
+    },
+    children: [
+      {
+        path: "",
+        component: () => import("@/views/member/index.vue"),
+        name: "memberPage",
+        meta: {
+          title: "成員列表",
+          icon: "el-icon-Avatar",
+          hidden: false,
           roles: ["ADMIN"],
           keepAlive: true,
         },
@@ -294,31 +296,6 @@ export const adminDynamicRoutes: RouteRecordRaw[] = [
 
 export const companyManagerDynamicRoutes: RouteRecordRaw[] = [
   {
-    path: "/member",
-    component: Layout,
-    name: "member",
-
-    meta: {
-      title: "成員管理",
-      icon: "el-icon-Avatar",
-      keepAlive: true,
-      alwaysShow: false,
-    },
-    children: [
-      {
-        path: "/member-page",
-        component: () => import("@/views/member/index.vue"),
-        name: "memberPage",
-        meta: {
-          title: "成員列表",
-          icon: "el-icon-Avatar",
-          hidden: false,
-          roles: ["ADMIN"],
-          keepAlive: true,
-        },
-      },
-    ]
-  }, {
     path: "/department-management",
     component: Layout,
     name: "departmentManagement",
@@ -355,6 +332,31 @@ export const companyManagerDynamicRoutes: RouteRecordRaw[] = [
         },
       },
 
+    ]
+  }, {
+    path: "/member",
+    component: Layout,
+    name: "member",
+
+    meta: {
+      title: "成員管理",
+      icon: "el-icon-Avatar",
+      keepAlive: true,
+      alwaysShow: false,
+    },
+    children: [
+      {
+        path: "/member-page",
+        component: () => import("@/views/member/index.vue"),
+        name: "memberPage",
+        meta: {
+          title: "成員列表",
+          icon: "el-icon-Avatar",
+          hidden: false,
+          roles: ["ADMIN"],
+          keepAlive: true,
+        },
+      },
     ]
   }, {
     path: "/company-course-management",

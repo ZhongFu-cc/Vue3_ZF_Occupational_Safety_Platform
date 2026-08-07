@@ -31,9 +31,12 @@
         </el-select>
       </el-form-item>
 
-      <!-- <el-form-item label="公司名稱" prop="companyName">
-        <el-input v-model="formData.companyName" placeholder="請輸入公司名稱" clearable />
-      </el-form-item> -->
+      <el-form-item v-if="props.role === 'admin'" label="公司名稱" prop="companyId">
+        <el-select v-model="formData.companyId" placeholder="請選擇公司" clearable filterable>
+          <el-option v-for="company in companyList" :key="company.companyId" :label="company.name"
+            :value="company.companyId" />
+        </el-select>
+      </el-form-item>
 
       <!-- <el-form-item label="公司" prop="companyId">
         <el-select @end-reached="findCompanyList(false)" v-model="formData.companyId" filterable remote clearable
@@ -62,7 +65,7 @@ import { reactive, ref } from 'vue';
 import type { AddSysUser } from '@/api/system/type';
 import { useUserService } from '@/service/UserService';
 import { tryCatch } from '@/utils/tryCatch';
-import { findCompanyListByQueryTextAndPaginationApi } from '@/api/company';
+import { findCompanyListByQueryTextAndPaginationApi, findAllCompanyListApi } from '@/api/company';
 import { Company } from '@/api/company/type';
 import { useUserStore } from '@/store';
 import { findDepartmentListByQueryTextAndPaginationApi } from '@/api/department';
@@ -109,7 +112,8 @@ const rules = reactive<FormRules<AddSysUser>>({
     { type: 'email', message: '電子信箱格式錯誤', trigger: ['blur', 'change'] },
   ],
   phone: [{ required: true, message: '請輸入聯絡電話', trigger: 'blur' }],
-  companyName: [{ required: true, message: '請輸入公司名稱', trigger: 'blur' }],
+  companyId: [{ required: true, message: '請選擇公司', trigger: 'change' }],
+  departmentId: [{ required: true, message: '請選擇部門', trigger: 'change' }],
 });
 
 const resetForm = () => {
@@ -122,6 +126,8 @@ const handleCancel = () => {
   emit('cancel');
 };
 
+const selectCompany = ref<Company>({} as Company);
+
 const handleSubmit = async () => {
   if (!createFormRef.value) {
     return;
@@ -132,14 +138,22 @@ const handleSubmit = async () => {
     return;
   }
 
+  if (props.role === 'admin') {
+    formData.companyName = companyList.value.find(c => c.companyId === formData.companyId)?.name || '';
+    // formData.companyId is already set by v-model
+  } else if (props.role === 'company') {
+    formData.companyName = user.companyName;
+    formData.companyId = user.companyId;
+  }
+
   const { res, error }: any = await tryCatch(userService.createUser({
     account: formData.account.trim(),
     password: formData.password,
     realName: formData.realName.trim(),
     email: formData.email.trim(),
     phone: formData.phone.trim(),
-    companyName: user.companyName,
-    companyId: user.companyId,
+    companyName: formData.companyName,
+    companyId: formData.companyId,
     remark: formData.remark.trim(),
     departmentId: formData.departmentId,
   }));
@@ -163,23 +177,11 @@ const handleSubmit = async () => {
   emit('submit');
 };
 
-const currentPage = ref(1);
-const queryText = ref('');
 const companyList = ref<Company[]>([]);
-const hasMore = ref(true);
-const findCompanyList = async (isRefresh = false) => {
-  if (isRefresh) {
-    currentPage.value = 1;
-    companyList.value = [];
-  }
+const findCompanyList = async () => {
 
-  if (!hasMore.value && !isRefresh) {
-    console.log('沒有更多公司了')
-    return;
-  }
-
-  const { res, error }: any = await tryCatch(findCompanyListByQueryTextAndPaginationApi(currentPage.value, 10, queryText.value));
-  console.log('findCompanyListByQueryTextAndPaginationApi res', res, 'error', error);
+  const { res, error }: any = await tryCatch(findAllCompanyListApi());
+  console.log('findAllCompanyListApi res', res, 'error', error);
   if (error || res.code !== 200) {
     ElNotification({
       title: '錯誤',
@@ -188,13 +190,8 @@ const findCompanyList = async (isRefresh = false) => {
     });
     return;
   }
-  companyList.value = res.data.records;
-  hasMore.value = companyList.value.length < res.data.total;
-
-  if (hasMore.value) {
-    currentPage.value++;
-  }
-}
+  companyList.value = res.data;
+};
 
 const departmentList = ref<Department[]>([]);
 const departmentCurrentPage = ref(1);
@@ -228,14 +225,10 @@ const findDepartmentList = async (isRefresh = false) => {
   }
 }
 
-const remoteMethod = (query: string) => {
-  queryText.value = query;
-  findCompanyList(true);
-};
 
 watch(() => props.role, () => {
   if (props.role === 'admin') {
-    findCompanyList(true);
+    findCompanyList();
   } else if (props.role === 'company') {
     findDepartmentList(true);
   }

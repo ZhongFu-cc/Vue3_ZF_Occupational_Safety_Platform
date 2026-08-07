@@ -20,8 +20,11 @@
         <el-input v-model="formData.phone" placeholder="請輸入聯絡電話" clearable />
       </el-form-item>
 
-      <el-form-item label="公司名稱" prop="companyName">
-        <el-input v-model="formData.companyName" placeholder="請輸入公司名稱" clearable />
+      <el-form-item v-if="props.role === 'admin'" label="公司名稱" prop="companyName" disabled>
+        <el-select v-model="formData.companyId" placeholder="請選擇公司" clearable filterable disabled>
+          <el-option v-for="company in companyList" :key="company.companyId" :label="company.name"
+            :value="company.companyId" />
+        </el-select>
       </el-form-item>
 
       <el-form-item v-if="props.role === 'company'" label="部門" prop="departmentId">
@@ -57,6 +60,9 @@ import { useUserService } from '@/service/UserService';
 import { tryCatch } from '@/utils/tryCatch';
 import { findDepartmentListByQueryTextAndPaginationApi } from '@/api/department';
 import { Department } from '@/api/department/type';
+import { findAllCompanyListApi } from '@/api/company';
+import { Company } from '@/api/company/type';
+import { useUserStore } from '@/store';
 
 
 const props = defineProps<{
@@ -66,6 +72,8 @@ const props = defineProps<{
 }>();
 
 const userService = useUserService(props.role);
+const user = useUserStore().user;
+
 
 const emit = defineEmits(['submit', 'cancel']);
 
@@ -79,6 +87,7 @@ const EMPTY_USER: PutSysUser = {
   companyName: '',
   remark: '',
   departmentId: '',
+  companyId: '',
 };
 
 const updateFormRef = ref<FormInstance>();
@@ -96,6 +105,7 @@ const rules = reactive<FormRules<PutSysUser>>({
   phone: [{ required: true, message: '請輸入聯絡電話', trigger: 'blur' }],
   companyName: [{ required: true, message: '請輸入公司名稱', trigger: 'blur' }],
   password: [{ required: true, message: '請輸入密碼', trigger: 'blur' }],
+  companyId: [{ required: true, message: '請選擇公司', trigger: 'change' }],
 });
 
 const syncFormData = (user: SysUser) => {
@@ -108,6 +118,7 @@ const syncFormData = (user: SysUser) => {
   formData.companyName = user?.companyName ?? '';
   formData.remark = user?.remark ?? '';
   formData.departmentId = user?.departmentId ?? '';
+  formData.companyId = user?.companyId ?? '';
 };
 
 watch(
@@ -165,6 +176,7 @@ const handleSubmit = async () => {
     return;
   }
 
+
   const { res, error }: any = await tryCatch(userService.updateUser(formData));
   if (error || res.code !== 200) {
     ElNotification({
@@ -184,9 +196,27 @@ const handleSubmit = async () => {
   emit('submit');
 };
 
+const companyList = ref<Company[]>([]);
+const findCompanyList = async () => {
+
+  const { res, error }: any = await tryCatch(findAllCompanyListApi());
+  if (error || res.code !== 200) {
+    ElNotification({
+      title: '錯誤',
+      message: '無法獲取公司列表',
+      type: 'error',
+    });
+    return;
+  }
+  companyList.value = res.data;
+};
+
 onMounted(() => {
   if (props.role === 'company') {
     findDepartmentList(true);
+  }
+  if (props.role === 'admin') {
+    findCompanyList();
   }
 });
 </script>
